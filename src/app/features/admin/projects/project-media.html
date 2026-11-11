@@ -1,0 +1,356 @@
+<section class="project-media-area" aria-label="Archivos del proyecto">
+  @if (mode() === 'all') {
+    <nav class="actions media-groups" aria-label="Grupos de archivos">
+      @for (item of roles; track item.value) {
+        <button
+          type="button"
+          [attr.aria-current]="group() === item.value ? 'true' : null"
+          (click)="group.set(item.value)"
+          [disabled]="busy()"
+        >
+          {{ item.label }}
+        </button>
+      }
+    </nav>
+  }
+  <header class="section-heading">
+    <div>
+      <h2>{{ label(activeGroup()) }}</h2>
+      <p class="muted">
+        Revisa los archivos y su posición antes de guardar los cambios del proyecto.
+      </p>
+    </div>
+  </header>
+  @if (activeGroup() === 'COVER') {
+    <p class="muted">
+      Esta imagen representará tu proyecto en el portafolio. La nueva portada se aplicará al guardar
+      los cambios.
+    </p>
+    <p class="muted">
+      Recomendado: imagen horizontal de 2400 × 1500 px (16:10). Aquí se muestra completa, sin
+      recortes ni deformación. Las tarjetas públicas usan 16:10; si la imagen tiene otra proporción,
+      sus bordes pueden recortarse. El banner se adapta a cada pantalla y puede recortar los bordes:
+      mantén el elemento principal cerca del centro.
+    </p>
+  }
+  @if (activeGroup() === 'COVER') {
+    @if (coverAsset(); as asset) {
+      <div class="cover-preview">
+        <app-media-preview [asset]="asset" [cover]="true" fit="contain" [autoload]="true" />
+      </div>
+    } @else if (!loading() || !projectId()) {
+      <div class="cover-placeholder">Aún no hay una portada. Sube una imagen para tu proyecto.</div>
+    }
+  }
+  <div
+    class="upload-dropzone"
+    [class.drag-active]="draggingFiles() && !locked() && !busy()"
+    [class.cover-upload]="activeGroup() === 'COVER'"
+    (dragenter)="dragEnter($event)"
+    (dragleave)="dragLeave($event)"
+    (dragover)="$event.preventDefault()"
+    (drop)="drop($event, activeGroup())"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.4"
+      aria-hidden="true"
+    >
+      <path d="M12 16V3m-4 4 4-4 4 4M4 15v5h16v-5" />
+    </svg>
+    @if (activeGroup() === 'COVER') {
+      <p>
+        <button
+          type="button"
+          class="cover-upload-action"
+          [disabled]="locked() || busy()"
+          (click)="coverFiles.click()"
+        >
+          Haz clic para subir
+        </button>
+        o arrastra una imagen aquí
+      </p>
+    } @else {
+      <strong>Añade archivos a tu proyecto</strong>
+      <p>Arrastra archivos aquí o selecciónalos desde tu equipo.</p>
+      <button
+        type="button"
+        class="primary"
+        [disabled]="locked() || busy()"
+        (click)="coverFiles.click()"
+      >
+        Subir archivos
+      </button>
+    }
+    <input
+      #coverFiles
+      class="file-input"
+      hidden
+      [id]="activeGroup() === 'COVER' ? 'project-cover-files' : 'project-gallery-files'"
+      type="file"
+      [accept]="
+        mode() !== 'all' || activeGroup() === 'COVER' ? '.jpg,.jpeg,.png,.webp,.avif' : acceptFiles
+      "
+      [multiple]="activeGroup() !== 'COVER'"
+      [disabled]="locked() || busy()"
+      (change)="selectFiles($event, activeGroup())"
+    />
+    <small>{{
+      mode() !== 'all' || activeGroup() === 'COVER'
+        ? 'JPEG, PNG, WebP y AVIF · hasta 20 MiB'
+        : 'Imágenes · PDF · vídeo · GLB · STL. STL: hasta 100 MiB; el GLB resultante también debe caber en 100 MiB. Se conservan coordenadas y orientación sin asumir unidades. Los modelos se guardan en Modelos 3D.'
+    }}</small>
+  </div>
+  @if (pendingSelection()) {
+    <p role="status">
+      Guarda primero el nombre y el enlace del proyecto para iniciar estas subidas.
+    </p>
+    <button type="button" (click)="draftRequested.emit()" [disabled]="locked()">
+      Guardar borrador e iniciar
+    </button>
+    <button type="button" (click)="cancelPending()" [disabled]="locked()">
+      Descartar selección pendiente
+    </button>
+  }
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+  @for (job of queue.jobs(); track job.key) {
+    <article class="upload-job" [hidden]="!visible(job.role)">
+      @if (job.preview) {
+        <img
+          [src]="job.preview"
+          alt="Vista previa local del archivo seleccionado"
+          (error)="queue.previewFailed(job)"
+        />
+      } @else if (job.file.type.startsWith('image/')) {
+        <span class="preview-unavailable">Vista previa no disponible</span>
+      }
+      <div class="name">
+        <strong>{{ job.file.name }}</strong>
+        <p role="status">{{ queue.label(job) }}</p>
+        @if (job.upload.stage() === 'converting') {
+          <progress
+            max="100"
+            [value]="job.upload.conversionProgress()"
+            aria-label="Progreso de conversión STL a GLB"
+          ></progress>
+        }
+        @if (job.upload.stage() === 'uploading') {
+          @if (job.upload.progress() !== null) {
+            <progress
+              max="100"
+              [value]="job.upload.progress()"
+              aria-label="Progreso de subida"
+            ></progress>
+          } @else {
+            <progress aria-label="Conectando con almacenamiento"></progress>
+          }
+        }
+        @if (job.error() || job.upload.error()) {
+          <p class="error" role="alert">{{ job.error() || job.upload.error() }}</p>
+        }
+        @if (job.upload.stage() === 'failed' && job.upload.unresolved && !job.upload.canConfirm) {
+          <p>
+            «Reintentar subida» cancela la autorización anterior y solicita una nueva
+            automáticamente.
+          </p>
+        }
+        @if (job.upload.retryAfter()) {
+          <small>Reintenta después de: {{ job.upload.retryAfter() }}</small>
+        }
+      </div>
+      <div class="actions">
+        @if (
+          job.association() === 'failed' || ['failed', 'cancelled'].includes(job.upload.stage())
+        ) {
+          <button type="button" (click)="queue.retry(job)" [disabled]="locked() || job.upload.busy">
+            {{
+              job.upload.asset()
+                ? 'Reintentar asociación'
+                : job.upload.canConfirm
+                  ? 'Reintentar confirmación'
+                  : 'Reintentar subida'
+            }}
+          </button>
+        }
+        @if (job.association() !== 'completed' && job.association() !== 'dismissed') {
+          <button
+            type="button"
+            (click)="queue.cancel(job)"
+            [disabled]="job.association() === 'associating' || job.upload.stage() === 'confirming'"
+          >
+            {{ job.upload.asset() ? 'Conservar solo en biblioteca' : 'Cancelar' }}
+          </button>
+        }
+        @if (
+          !job.upload.busy &&
+          !job.upload.unresolved &&
+          job.association() !== 'associating' &&
+          !(job.upload.asset()?.type === 'IMAGE' && job.association() === 'completed')
+        ) {
+          <button type="button" (click)="queue.remove(job)">Cerrar resultado</button>
+        }
+      </div>
+    </article>
+  }
+  @if (activeGroup() === 'COVER' && coverAsset()) {
+    <form class="cover-fields" [formGroup]="coverMetadata" (ngSubmit)="saveCoverAlt()">
+      <label for="project-cover-alt">Texto alternativo</label>
+      <input
+        id="project-cover-alt"
+        formControlName="alt_text"
+        maxlength="255"
+        placeholder="Describe la arquitectura de la imagen"
+        [readonly]="busy() || locked()"
+        [attr.aria-invalid]="
+          coverMetadata.controls.alt_text.invalid && coverMetadata.controls.alt_text.touched
+        "
+        aria-describedby="project-cover-alt-error"
+      />
+      @if (coverMetadata.controls.alt_text.invalid && coverMetadata.controls.alt_text.touched) {
+        <p class="field-error" id="project-cover-alt-error">
+          {{
+            coverMetadata.controls.alt_text.errors?.['backend']
+              ? 'El servidor rechazó el texto alternativo. Revísalo e intenta de nuevo.'
+              : 'El texto alternativo admite hasta 255 caracteres.'
+          }}
+        </p>
+      }
+      <div class="actions">
+        <button
+          type="submit"
+          [disabled]="busy() || locked() || !coverMetadata.dirty || coverMetadata.invalid"
+        >
+          Aceptar texto alternativo
+        </button>
+        <button type="button" [disabled]="busy() || locked()" (click)="removing.set(coverLink())">
+          Quitar portada
+        </button>
+      </div>
+    </form>
+  }
+  @if (projectId()) {
+    @if (loading()) {
+      <p role="status">Cargando archivos…</p>
+    }
+    @if (!loading() && !ready()) {
+      <button type="button" (click)="load()">Reintentar archivos</button>
+    }
+    @if (mode() === 'gallery' && hasVisibleFiles()) {
+      <p class="muted">
+        Arrastra los cuadros para ordenar las fotografías. También puedes usar las flechas.
+      </p>
+    }
+    <div
+      class="project-media-grid"
+      [hidden]="activeGroup() === 'COVER'"
+      cdkDropList
+      cdkDropListOrientation="mixed"
+      [cdkDropListDisabled]="
+        mode() !== 'gallery' || busy() || locked() || queue.transferring() || loading()
+      "
+      (cdkDropListDropped)="
+        reorderPhotographs($event.previousIndex, $event.currentIndex, $event.isPointerOverContainer)
+      "
+    >
+      @for (link of links(); track link.id; let index = $index) {
+        @if (mode() !== 'gallery' || visibleFile(link, index)) {
+          <article
+            class="project-media-card"
+            [hidden]="!visibleFile(link, index)"
+            cdkDrag
+            cdkDragPreviewContainer="parent"
+            [cdkDragStartDelay]="{ touch: 200, mouse: 0 }"
+          >
+            @if (assets()[link.media_id]; as asset) {
+              <app-media-preview
+                [asset]="asset"
+                [downloadable]="true"
+                [controls]="mode() !== 'gallery'"
+                [autoload]="activeGroup() !== 'COVER' && visibleFile(link, index)"
+              />
+            }
+            <div class="asset-info">
+              <strong>{{
+                assets()[link.media_id]?.title ||
+                  assets()[link.media_id]?.original_filename ||
+                  'Archivo no disponible'
+              }}</strong>
+              <div class="actions">
+                <button
+                  type="button"
+                  [disabled]="busy() || locked() || queue.transferring() || !canMove(index, -1)"
+                  (click)="move(index, -1)"
+                  aria-label="Subir archivo"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  [disabled]="busy() || locked() || queue.transferring() || !canMove(index, 1)"
+                  (click)="move(index, 1)"
+                  aria-label="Bajar archivo"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  [disabled]="busy() || locked()"
+                  (click)="editMetadata(assets()[link.media_id])"
+                >
+                  Detalles
+                </button>
+                <button
+                  type="button"
+                  [disabled]="busy() || locked() || queue.transferring()"
+                  (click)="removing.set(link)"
+                >
+                  Quitar del proyecto
+                </button>
+              </div>
+            </div>
+          </article>
+        }
+      }
+    </div>
+    @if (ready() && !hasVisibleFiles()) {
+      <p class="empty-note">Aún no hay archivos en este grupo. Sube uno desde tu equipo.</p>
+    }
+    <p role="status">{{ busy() ? 'Guardando multimedia…' : message() }}</p>
+  }
+  @if (metadataId()) {
+    <app-project-edit-modal
+      title="Detalles del archivo"
+      [blocked]="busy()"
+      (cancelled)="cancelMetadata()"
+    >
+      <form class="metadata-editor" [formGroup]="metadata" (ngSubmit)="saveMetadata()">
+        @if (error()) {
+          <p role="alert" class="error">{{ error() }}</p>
+        }
+        <p>Estos detalles se comparten en todos los lugares donde uses este archivo.</p>
+        <label>Título<input formControlName="title" maxlength="255" /></label>
+        <label>Texto alternativo<input formControlName="alt_text" maxlength="255" /></label>
+        <label
+          >Descripción<textarea formControlName="description" maxlength="20000"></textarea>
+        </label>
+        <div class="actions">
+          <button type="submit" class="primary" [disabled]="busy() || metadata.invalid || locked()">
+            Aceptar</button
+          ><button type="button" [disabled]="busy()" (click)="cancelMetadata()">Cancelar</button>
+        </div>
+      </form>
+    </app-project-edit-modal>
+  }
+</section>
+@if (removing()) {
+  <app-project-confirm
+    title="Quitar del proyecto"
+    message="El archivo se quitará de este proyecto. Seguirá disponible en la biblioteca y en otros proyectos donde lo uses."
+    action="Quitar del proyecto"
+    (answer)="confirmDetach($event)"
+  />
+}

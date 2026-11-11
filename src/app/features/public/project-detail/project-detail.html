@@ -1,0 +1,67 @@
+@if (loading()) {
+  <section class="status" aria-busy="true">
+    <h1>Proyecto</h1>
+    <p role="status">Cargando proyecto…</p>
+  </section>
+} @else if (error()) {
+  <section class="status">
+    <h1>{{ missing() ? 'Proyecto no encontrado.' : 'Proyecto no disponible.' }}</h1>
+    <p role="alert">
+      {{
+        missing() ? 'No se encontró el proyecto o no está disponible al público.' : errorMessage()
+      }}
+    </p>
+    @if (!missing()) {
+      <button type="button" (click)="retry()">Reintentar</button>
+    }
+    <a routerLink="/projects">Volver a proyectos ↗</a>
+  </section>
+} @else if (project(); as project) {
+  <article>
+    <app-project-spotlight [project]="project" [hero]="true" [detail]="true" />
+    <section id="projects" class="overview" aria-label="Información del proyecto">
+      @if (facts().length) {
+        <dl class="facts">
+          @for (fact of facts(); track $index) {
+            <div>
+              <dt>{{ fact.label }}</dt>
+              <dd>{{ fact.value }}</dd>
+            </div>
+          }
+        </dl>
+      }
+      @if (project.description || project.short_description) {
+        <div class="introduction">
+          <span class="label">01 / La idea</span>
+          <div>
+            <h2>{{ project.title }}</h2>
+            <p>{{ project.description || project.short_description }}</p>
+          </div>
+        </div>
+      }
+    </section>
+    @for (section of project.sections; track $index) {
+      <app-project-section-renderer [section]="section" [sequence]="$index + 1" />
+    }
+    @if (extraMedia().length) {
+      <app-project-section-renderer
+        [mixedMedia]="true"
+        [section]="{
+          section_type: 'GALLERY',
+          title: 'Archivos del proyecto',
+          content: null,
+          media: extraMedia(),
+        }"
+      />
+    }
+    @if (next(); as next) {
+      <a class="next-project" [routerLink]="['/projects', next.slug]">
+        <app-public-cover [media]="next.cover" [title]="next.title" />
+        <div class="next-copy">
+          <span class="label">Siguiente proyecto →</span>
+          <h2>{{ next.title }} ↗</h2>
+        </div>
+      </a>
+    }
+  </article>
+}

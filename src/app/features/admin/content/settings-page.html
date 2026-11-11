@@ -1,0 +1,83 @@
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">Contenido global</p>
+    <h1>Configuración</h1>
+    <p>Guarda cada configuración de forma independiente.</p>
+  </div>
+</header>
+@if (loading()) {
+  <p role="status">Cargando configuración…</p>
+}
+@if (error()) {
+  <p role="alert" class="error">{{ error() }}</p>
+  @if (!loaded()) {
+    <button type="button" (click)="load()" [disabled]="loading()">Reintentar</button>
+  }
+}
+<p role="status">{{ saving() ? 'Guardando configuración…' : notice() }}</p>
+@if (loaded()) {
+  <form class="setting-form" [formGroup]="title" (ngSubmit)="save('site_title')">
+    <fieldset [disabled]="saving() === 'site_title'">
+      <legend>Título del sitio</legend>
+      <p class="muted">
+        {{ configured().includes('site_title') ? 'Configurado' : 'Aún no configurado' }}
+      </p>
+      <label
+        >Título *<input
+          id="setting-title"
+          formControlName="value"
+          maxlength="200"
+          required
+          aria-describedby="setting-title-help setting-title-error"
+      /></label>
+      <p id="setting-title-help" class="muted">
+        Texto de una línea, sin HTML; máximo 200 caracteres.
+      </p>
+      @if (title.controls.value.invalid && title.controls.value.touched) {
+        <p id="setting-title-error" class="field-error">
+          Indica un título válido de hasta 200 caracteres.
+        </p>
+      }
+    </fieldset>
+    <button type="submit" class="primary" [disabled]="!!saving()">Guardar título</button>
+  </form>
+  <form class="setting-form" [formGroup]="description" (ngSubmit)="save('site_description')">
+    <fieldset [disabled]="saving() === 'site_description'">
+      <legend>Descripción del sitio</legend>
+      <p class="muted">
+        {{ configured().includes('site_description') ? 'Configurado' : 'Aún no configurado' }}
+      </p>
+      <label
+        >Descripción *<textarea
+          id="setting-description"
+          formControlName="value"
+          maxlength="500"
+          rows="4"
+          required
+          aria-describedby="setting-description-help setting-description-error"
+        ></textarea>
+      </label>
+      <p id="setting-description-help" class="muted">
+        Una línea de texto plano, sin HTML ni saltos de línea; máximo 500 caracteres.
+      </p>
+      @if (description.controls.value.invalid && description.controls.value.touched) {
+        <p id="setting-description-error" class="field-error">
+          Indica una descripción válida de hasta 500 caracteres.
+        </p>
+      }
+    </fieldset>
+    <button type="submit" class="primary" [disabled]="!!saving()">Guardar descripción</button>
+  </form>
+  @if (unknown().length) {
+    <section aria-labelledby="unsupported-settings">
+      <h2 id="unsupported-settings">Configuraciones no soportadas</h2>
+      <p>Estas keys se conservan sin editar ni sobrescribir sus valores.</p>
+      <ul>
+        @for (key of unknown(); track key) {
+          <li>{{ key }}</li>
+        }
+      </ul>
+    </section>
+  }
+}
+<app-content-leave-confirm />

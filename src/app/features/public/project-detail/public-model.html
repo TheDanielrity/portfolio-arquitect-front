@@ -1,0 +1,93 @@
+<div class="model-stage" [attr.aria-busy]="loading()">
+  <dl class="metrics dimensions">
+    <dt>Dimensiones · X / Y / Z</dt>
+    <dd>{{ dimensions() }}</dd>
+    @if (unitless()) {
+      <dd class="unit-note">Unidades originales del STL; sin unidad física</dd>
+    }
+  </dl>
+  <dl class="metrics faces">
+    <dt>Triángulos</dt>
+    <dd>{{ triangles() === null ? '—' : triangles()?.toLocaleString('es') }}</dd>
+  </dl>
+  @if (active()) {
+    <model-viewer
+      #viewer
+      [attr.src]="delivery.url(current())"
+      [attr.alt]="current().alt_text || current().title || 'Maqueta arquitectónica 3D'"
+      camera-controls
+      touch-action="pan-y"
+      loading="eager"
+      interaction-prompt="none"
+      camera-orbit="25deg 65deg auto"
+      camera-target="auto auto auto"
+      min-camera-orbit="auto auto 10%"
+      shadow-intensity="0.6"
+      shadow-softness="1"
+      exposure="0.45"
+      tone-mapping="aces"
+      environment-image="neutral"
+      (load)="loaded()"
+      (progress)="onProgress($event)"
+      (error)="onViewerError($event)"
+      (keydown)="onKey($event)"
+      tabindex="0"
+    />
+  }
+  @if (!active() || loading()) {
+    <div class="model-status">
+      <span class="eyebrow">Maqueta digital / 3D</span>
+      @if (!supported()) {
+        <p role="status">Este formato de modelo no está disponible.</p>
+      } @else if (unsupported()) {
+        <p role="status">Este dispositivo no admite WebGL 2.</p>
+        <p>Puedes descargar el modelo para verlo en una aplicación 3D.</p>
+      } @else if (loading()) {
+        <p role="status">Cargando modelo 3D…</p>
+        <progress max="1" [value]="progress()" aria-label="Progreso de carga del modelo"></progress>
+        <p>Los modelos grandes pueden tardar varios minutos en el teléfono.</p>
+      } @else {
+        @if (failed()) {
+          <p role="alert">No se pudo cargar el modelo. Vuelve a intentarlo.</p>
+          @if (loadError()) {
+            <p>{{ loadError() }}</p>
+          }
+          <button type="button" class="activate" (click)="requestLoad()">
+            Reintentar modelo 3D ↗
+          </button>
+        } @else {
+          <p role="status">Cargando modelo 3D…</p>
+        }
+      }
+      @if (failed() || unsupported()) {
+        <a [href]="delivery.url(current())" target="_blank" rel="noopener">Descargar GLB ↗</a>
+      }
+    </div>
+  }
+  <div class="model-bottom">
+    <span class="model-caption">{{ current().title || 'Maqueta arquitectónica' }}</span>
+    @if (active() && !loading()) {
+      <div class="model-controls" role="group" aria-label="Cámara del modelo">
+        <button type="button" aria-label="Girar a la izquierda" (click)="rotate(-1)">↶</button>
+        <button type="button" aria-label="Girar a la derecha" (click)="rotate(1)">↷</button>
+        <button type="button" aria-label="Acercar" (click)="zoom(1)">+</button>
+        <button type="button" aria-label="Alejar" (click)="zoom(-1)">−</button>
+        <button type="button" (click)="resetCamera()">Restablecer</button>
+        @if (fullscreenAvailable) {
+          <button type="button" aria-label="Alternar pantalla completa" (click)="fullscreen()">
+            ⛶
+          </button>
+        }
+      </div>
+    }
+  </div>
+</div>
+<div class="model-help">
+  <p>
+    Arrastra o usa las flechas para girar · Pellizca o usa Re Pág / Av Pág para acercar · Esc para
+    salir de pantalla completa
+  </p>
+  @if (controlError()) {
+    <p role="status">{{ controlError() }}</p>
+  }
+</div>

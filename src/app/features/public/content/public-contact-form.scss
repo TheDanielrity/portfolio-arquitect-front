@@ -1,0 +1,108 @@
+@use '../../../shared/public/public-design' as design;
+:host {
+  display: block;
+}
+section {
+  border-top: 1px solid #f4f4ec40;
+  margin-top: 64px;
+  padding-top: 48px;
+  scroll-margin-top: calc(var(--public-header-height) + 24px);
+}
+h3 {
+  font: 500 clamp(28px, 3vw, 44px)/1.15 var(--public-font-display);
+  letter-spacing: -0.03em;
+  margin: 20px 0 40px;
+}
+.label,
+label,
+button {
+  @include design.label;
+}
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+}
+.field {
+  min-width: 0;
+}
+label {
+  display: block;
+  margin-bottom: 12px;
+}
+input,
+textarea {
+  width: 100%;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #f4f4ec80;
+  border-radius: 0;
+  padding: 12px 0;
+  font: 400 16px/1.6 var(--public-font-body);
+}
+textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+.message {
+  grid-column: 1 / -1;
+}
+.submit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 32px;
+}
+button {
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  padding: 16px 0;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+}
+button:hover {
+  color: #df8975;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+input:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  @include design.focus;
+}
+.field-error,
+.error {
+  color: #f1a28f;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.receipt {
+  font-size: 18px;
+  line-height: 1.6;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+@media (max-width: 47.999rem) {
+  .fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .submit-row {
+    align-items: start;
+  }
+}

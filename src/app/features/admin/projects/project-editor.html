@@ -1,0 +1,438 @@
+@if (
+  state() === 'ready' &&
+  (saving() || !id || form.dirty || draft.pending() || media()?.coverMetadata.dirty)
+) {
+  <div class="actions save-bar">
+    @if (saving() || !id || form.dirty || draft.pending() || media()?.coverMetadata.dirty) {
+      <button
+        id="project-save"
+        type="submit"
+        form="project-form"
+        class="primary"
+        [disabled]="
+          saving() ||
+          openEditor() ||
+          attributes()?.busy() ||
+          taxonomy()?.busy() ||
+          sections()?.busy() ||
+          media()?.pending() ||
+          media()?.busy()
+        "
+      >
+        {{ saving() ? 'Guardando…' : id ? 'Guardar cambios' : 'Guardar y continuar' }}
+      </button>
+    }
+  </div>
+}
+@if (success()) {
+  <p class="save-notice" role="status" aria-live="polite">{{ success() }}</p>
+}
+<div
+  class="editor-content"
+  cdkScrollable
+  role="region"
+  aria-label="Edición del proyecto"
+  tabindex="0"
+>
+  <header class="page-heading">
+    <div>
+      <a routerLink="/admin/projects">← Proyectos</a>
+      <h1>{{ id ? 'Editar proyecto' : 'Crear proyecto' }}</h1>
+      <p>Completa la información, añade archivos y prepara tu proyecto para publicarlo.</p>
+    </div>
+    @if (id && state() === 'ready') {
+      <button
+        type="button"
+        class="danger"
+        [disabled]="
+          saving() ||
+          attributes()?.busy() ||
+          taxonomy()?.busy() ||
+          sections()?.busy() ||
+          media()?.pending() ||
+          media()?.busy()
+        "
+        (click)="confirmation.set('delete')"
+      >
+        Eliminar proyecto
+      </button>
+    }
+  </header>
+  @if (state() === 'loading') {
+    <p role="status">Cargando proyecto…</p>
+  }
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+  @if (retryAfter()) {
+    <p>Reintenta después de: {{ retryAfter() }}</p>
+  }
+  @if (state() === 'error') {
+    <button type="button" (click)="load()">Reintentar carga</button>
+  }
+  @if (state() === 'ready') {
+    <nav class="editor-tabs" aria-label="Secciones del editor">
+      @for (item of tabs; track item.id) {
+        <button
+          type="button"
+          [attr.aria-current]="tab() === item.id ? 'true' : null"
+          [attr.aria-controls]="'project-panel-' + item.id"
+          (click)="tab.set(item.id)"
+        >
+          {{ item.label }}
+        </button>
+      }
+    </nav>
+    <form id="project-form" [formGroup]="form" (ngSubmit)="save()" [attr.aria-busy]="saving()">
+      <fieldset id="project-panel-basic" [hidden]="tab() !== 'basic'">
+        <legend>Información principal</legend>
+        <div class="field-grid">
+          <label class="wide"
+            >Título del proyecto<input
+              id="project-title"
+              formControlName="title"
+              maxlength="200"
+              [attr.aria-invalid]="invalid('title')"
+              aria-describedby="title-error"
+            />
+            @if (invalid('title')) {
+              <span id="title-error" class="field-error"
+                >Escribe el nombre del proyecto (máximo 200 caracteres).</span
+              >
+            }
+          </label>
+          <label class="wide"
+            >Resumen del proyecto<textarea
+              formControlName="short_description"
+              [attr.aria-invalid]="invalid('short_description')"
+              aria-describedby="summary-help short_description-error"
+              maxlength="500"
+            ></textarea
+            ><small id="summary-help"
+              >Resume el proyecto en una o dos frases para presentarlo en el portafolio.</small
+            >
+            @if (invalid('short_description')) {
+              <span id="short_description-error" class="field-error"
+                >El resumen admite hasta 500 caracteres.</span
+              >
+            }
+          </label>
+          <label class="wide"
+            >Descripción completa<textarea
+              formControlName="description"
+              [attr.aria-invalid]="invalid('description')"
+              aria-describedby="description-help description-error"
+              maxlength="50000"
+            ></textarea
+            ><small id="description-help"
+              >Explica el concepto, el contexto y las decisiones de diseño.</small
+            >
+            @if (invalid('description')) {
+              <span id="description-error" class="field-error"
+                >La descripción completa admite hasta 50 000 caracteres.</span
+              >
+            }
+          </label>
+        </div>
+      </fieldset>
+      <fieldset id="project-panel-details" [hidden]="tab() !== 'details'">
+        <legend>Datos del proyecto</legend>
+        <div class="field-grid">
+          <label
+            >Ubicación<input
+              formControlName="location"
+              [attr.aria-invalid]="invalid('location')"
+              aria-describedby="location-error"
+              maxlength="255"
+            />
+            @if (invalid('location')) {
+              <span id="location-error" class="field-error">Revisa la ubicación.</span>
+            }
+          </label>
+          <label
+            >Año<input
+              type="number"
+              formControlName="year"
+              [attr.aria-invalid]="invalid('year')"
+              aria-describedby="year-error"
+              min="1800"
+              max="2200"
+              step="1"
+            />
+            @if (invalid('year')) {
+              <span id="year-error" class="field-error">Año entero entre 1800 y 2200.</span>
+            }
+          </label>
+          <label
+            >Área (m²)<input
+              inputmode="decimal"
+              formControlName="area_m2"
+              [attr.aria-invalid]="invalid('area_m2')"
+              aria-describedby="area_m2-error"
+            />
+            @if (invalid('area_m2')) {
+              <span id="area_m2-error" class="field-error"
+                >Área positiva, hasta 10 dígitos enteros y 2 decimales.</span
+              >
+            }
+          </label>
+          <label
+            >Cliente<input
+              formControlName="client_name"
+              [attr.aria-invalid]="invalid('client_name')"
+              aria-describedby="client_name-error"
+              maxlength="200"
+            />
+            @if (invalid('client_name')) {
+              <span id="client_name-error" class="field-error">Revisa el cliente.</span>
+            }
+          </label>
+        </div>
+      </fieldset>
+      <fieldset id="project-panel-publication" [hidden]="tab() !== 'publication'">
+        <legend>Publicación</legend>
+        <div class="field-grid">
+          <label
+            >Estado de publicación<select id="project-status" formControlName="status">
+              @for (s of statuses; track s.value) {
+                <option [value]="s.value" [disabled]="!id && s.value === 'PUBLISHED'">
+                  {{ s.label }}
+                </option>
+              }
+            </select></label
+          ><label
+            >Quién puede ver el proyecto<select
+              id="project-visibility"
+              formControlName="visibility"
+            >
+              @for (v of visibilities; track v.value) {
+                <option [value]="v.value">{{ v.label }}</option>
+              }
+            </select></label
+          >
+        </div>
+        <p class="muted">
+          @switch (form.controls.status.value) {
+            @case ('DRAFT') {
+              Borrador: no aparece en el portafolio, aunque elijas visibilidad pública.
+            }
+            @case ('PUBLISHED') {
+              Publicado: puede mostrarse según quién pueda verlo. El servidor comprueba los
+              requisitos al guardar.
+            }
+            @case ('ARCHIVED') {
+              Archivado: deja de aparecer en el portafolio activo.
+            }
+          }
+        </p>
+        <p class="muted">
+          @switch (form.controls.visibility.value) {
+            @case ('PUBLIC') {
+              Público: aparece en los listados cuando está publicado.
+            }
+            @case ('PRIVATE') {
+              Privado: disponible únicamente en la administración.
+            }
+            @case ('UNLISTED') {
+              No listado: cuando está publicado, se puede acceder mediante su enlace, pero no
+              aparece en los listados.
+            }
+          }
+        </p>
+        <p class="muted">
+          Para publicar, guarda primero el proyecto y elige una portada de imagen.
+        </p>
+        @if (project()?.published_at) {
+          <p>Primera publicación: {{ project()?.published_at | date: 'dd/MM/yyyy, HH:mm' }}</p>
+        }
+      </fieldset>
+      <fieldset [hidden]="tab() !== 'publication'">
+        <legend>Enlace del proyecto</legend>
+        <p class="link-summary">
+          /projects/{{ form.controls.slug.value || 'nombre-del-proyecto' }}
+        </p>
+        <button
+          type="button"
+          (click)="customLink.set(!customLink())"
+          [attr.aria-expanded]="customLink()"
+        >
+          Personalizar enlace
+        </button>
+        @if (customLink()) {
+          <label
+            >Enlace del proyecto<input
+              id="project-slug"
+              formControlName="slug"
+              maxlength="220"
+              (input)="slugEdited()"
+              [attr.aria-invalid]="invalid('slug')"
+              aria-describedby="slug-help slug-error"
+          /></label>
+          <small id="slug-help">Solo letras minúsculas, números y guiones. Debe ser único.</small>
+          @if (id) {
+            <p class="muted">
+              Cambiar el enlace modifica la dirección del proyecto. Los enlaces anteriores dejarán
+              de funcionar; no se crean redirecciones.
+            </p>
+          }
+        }
+        @if (invalid('slug')) {
+          <p id="slug-error" class="field-error">
+            {{
+              form.controls.slug.errors?.['backend']
+                ? 'El servidor rechazó este enlace. Revísalo y vuelve a guardar.'
+                : 'El enlace solo puede contener letras minúsculas, números y guiones (máximo 220 caracteres).'
+            }}
+          </p>
+        }
+      </fieldset>
+      <fieldset id="project-panel-seo" [hidden]="tab() !== 'seo'">
+        <legend>Apariencia en Google</legend>
+        <p class="muted">
+          Esta información ayuda a describir tu proyecto en los resultados de búsqueda.
+        </p>
+        <label class="seo-mode">
+          <input
+            type="checkbox"
+            [checked]="customSeo()"
+            [disabled]="saving()"
+            (change)="setCustomSeo($any($event.target).checked)"
+          />
+          Personalizar SEO
+        </label>
+        <p class="muted">
+          {{
+            customSeo()
+              ? 'Se conservan tus valores. Desactiva la personalización para utilizar el SEO generado.'
+              : 'Se genera automáticamente a partir del título y del resumen o la descripción del proyecto.'
+          }}
+        </p>
+        @if (seoSettingsState() === 'loading') {
+          <p class="muted" role="status">Consultando el nombre del estudio…</p>
+        } @else if (seoSettingsState() === 'error') {
+          <p class="muted" role="status">
+            No se pudo consultar el nombre del estudio. Puedes continuar con el título del proyecto.
+          </p>
+        }
+        <div class="field-grid">
+          <label
+            >Título en los resultados de búsqueda<input
+              formControlName="seo_title"
+              [readOnly]="!customSeo()"
+              [attr.aria-invalid]="invalid('seo_title')"
+              aria-describedby="seo_title-error"
+              maxlength="200"
+            />
+            @if (invalid('seo_title')) {
+              <span id="seo_title-error" class="field-error"
+                >El título de búsqueda admite hasta 200 caracteres.</span
+              >
+            }</label
+          ><label
+            >Descripción en los resultados de búsqueda<textarea
+              formControlName="seo_description"
+              [readOnly]="!customSeo()"
+              [attr.aria-invalid]="invalid('seo_description')"
+              aria-describedby="seo_description-error"
+              maxlength="320"
+            ></textarea>
+            @if (invalid('seo_description')) {
+              <span id="seo_description-error" class="field-error"
+                >La descripción de búsqueda admite hasta 320 caracteres.</span
+              >
+            }
+          </label>
+        </div>
+        <section class="seo-preview" aria-label="Vista previa en Google">
+          <h3>Vista previa en Google</h3>
+          <p class="seo-preview-title">
+            {{ form.controls.seo_title.value || 'Título del proyecto' }}
+          </p>
+          <p>
+            {{
+              form.controls.seo_description.value ||
+                'Añade un resumen o una descripción para generar el SEO.'
+            }}
+          </p>
+          <small class="muted"
+            >Vista orientativa. Google puede ajustar el texto y su extensión.</small
+          >
+        </section>
+      </fieldset>
+    </form>
+    <div id="project-panel-media" [hidden]="tab() !== 'media' && tab() !== 'cover'">
+      @if (id) {
+        <app-project-media
+          [projectId]="id"
+          [locked]="saving()"
+          [mode]="tab() === 'cover' ? 'cover' : 'gallery'"
+        />
+      } @else {
+        <p class="editor-notice">
+          Primero guarda la información del proyecto para añadir fotografías y organizar su
+          presentación.
+        </p>
+      }
+    </div>
+    @if (id) {
+      <div [hidden]="tab() !== 'basic'">
+        <app-project-taxonomy [projectId]="id" [locked]="saving()" />
+      </div>
+      <div [hidden]="tab() !== 'details'">
+        <app-project-attributes [projectId]="id" [locked]="saving()" />
+      </div>
+      <div id="project-panel-sections" [hidden]="tab() !== 'sections'">
+        <app-project-sections [projectId]="id" [locked]="saving()" />
+      </div>
+    } @else {
+      @if (tab() === 'sections' || tab() === 'basic') {
+        <p class="muted">
+          Guarda la información del proyecto para añadir categorías, etiquetas y características
+          adicionales.
+        </p>
+      }
+    }
+    @if (media()?.pending()) {
+      <p class="editor-notice" role="status">
+        Hay cargas o asociaciones pendientes. Resuélvelas antes de guardar o publicar.
+      </p>
+      @if (!id) {
+        <button type="button" class="primary" [disabled]="saving()" (click)="ensureDraft()">
+          Guardar borrador e iniciar cargas
+        </button>
+      }
+    }
+  }
+</div>
+@if (confirmation(); as kind) {
+  <app-project-confirm
+    [title]="
+      kind === 'delete'
+        ? 'Eliminar proyecto'
+        : kind === 'publish'
+          ? 'Publicar proyecto'
+          : kind === 'link'
+            ? 'Cambiar el enlace publicado'
+            : 'Cambios sin guardar'
+    "
+    [message]="
+      kind === 'delete'
+        ? 'El proyecto dejará de aparecer en los listados. Esta acción no puede deshacerse desde el panel.'
+        : kind === 'publish'
+          ? 'Se guardarán los datos del proyecto como publicado, con la visibilidad seleccionada. El servidor verificará si está listo para publicarse.'
+          : kind === 'link'
+            ? 'El proyecto está publicado. Cambiar su dirección hará que los enlaces anteriores dejen de funcionar. ¿Quieres guardar el nuevo enlace?'
+            : 'Hay cambios sin guardar o cargas pendientes. Al salir se interrumpen las cargas locales; el borrador y los archivos ya confirmados se conservan. Puedes retomarlos desde Proyectos y la biblioteca. ¿Quieres salir?'
+    "
+    [action]="
+      kind === 'delete'
+        ? 'Eliminar'
+        : kind === 'publish'
+          ? 'Guardar y publicar'
+          : kind === 'link'
+            ? 'Guardar nuevo enlace'
+            : 'Salir sin guardar'
+    "
+    (answer)="answer($event)"
+  />
+}

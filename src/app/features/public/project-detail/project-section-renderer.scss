@@ -1,0 +1,119 @@
+:host {
+  display: block;
+}
+.section {
+  scroll-margin-top: calc(var(--public-header-height) + 24px);
+  margin: 112px var(--public-gutter) 0;
+}
+.section-model_3d {
+  margin-inline: 0;
+  > h2,
+  > .supporting,
+  > .missing {
+    margin-inline: var(--public-gutter);
+  }
+}
+h2 {
+  font: 500 clamp(28px, 4vw, 56px)/1.15 var(--public-font-display);
+  letter-spacing: -0.03em;
+  margin: 0 0 40px;
+  overflow-wrap: anywhere;
+}
+.label {
+  font: 400 10px/1.7 var(--public-font-mono);
+  text-transform: uppercase;
+  color: var(--public-primary);
+  letter-spacing: 0.09em;
+}
+.text-layout,
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: start;
+}
+.prose {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 16px;
+  line-height: 1.9;
+  max-width: 65ch;
+  margin: 0;
+  color: var(--public-muted-foreground);
+}
+.supporting {
+  margin-top: 32px;
+  margin-left: auto;
+}
+blockquote {
+  font: 500 clamp(32px, 5vw, 76px)/1.2 var(--public-font-display);
+  letter-spacing: -0.03em;
+  white-space: pre-wrap;
+  margin: 0 auto;
+  max-width: 1000px;
+  overflow-wrap: anywhere;
+}
+.section-quote {
+  padding: 64px 0;
+  border-top: 1px solid var(--public-border);
+  border-bottom: 1px solid var(--public-border);
+}
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 64px 32px;
+  align-items: start;
+}
+.gallery app-public-section-media {
+  grid-column: span 6;
+}
+.gallery app-public-section-media:nth-child(3n + 1) {
+  grid-column: 1 / span 10;
+}
+.gallery app-public-section-media:nth-child(3n + 3) {
+  margin-top: 96px;
+}
+.gallery app-public-section-media:only-child {
+  grid-column: 1/-1;
+}
+.missing {
+  min-height: 160px;
+  background: var(--public-border);
+  display: grid;
+  place-content: center;
+  color: var(--public-muted-foreground);
+}
+@media (max-width: 63.99rem) {
+  .text-layout,
+  .split {
+    gap: 32px;
+  }
+  .gallery {
+    gap: 40px 24px;
+  }
+  .gallery app-public-section-media:nth-child(3n + 3) {
+    margin-top: 48px;
+  }
+}
+@media (max-width: 47.99rem) {
+  .section {
+    margin-top: 64px;
+  }
+  .text-layout,
+  .split {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .gallery {
+    display: block;
+  }
+  .gallery app-public-section-media {
+    margin: 0 0 32px !important;
+  }
+  h2 {
+    margin-bottom: 24px;
+  }
+  .section-quote {
+    padding: 40px 0;
+  }
+}

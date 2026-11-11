@@ -1,0 +1,28 @@
+:host {
+  position: fixed;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  z-index: 30;
+}
+a {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  background: #087f3d;
+  box-shadow: 0 2px 12px #0003;
+}
+a:hover {
+  background: #066531;
+}
+a:focus-visible {
+  outline: 3px solid var(--public-ring);
+  outline-offset: 4px;
+}
+svg {
+  width: 34px;
+  height: 34px;
+}

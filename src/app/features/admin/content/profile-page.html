@@ -1,0 +1,195 @@
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">Contenido global</p>
+    <h1>Perfil</h1>
+    <p>Tu presentación profesional y los datos de contacto que se muestran en el portafolio.</p>
+  </div>
+  <div class="actions save-actions">
+    <p role="status">{{ saving() ? 'Guardando…' : notice() }}</p>
+    @if (hasChanges() || social()?.whatsappForm?.dirty || saving()) {
+      <button
+        id="profile-save"
+        type="submit"
+        form="profile-form"
+        class="primary"
+        [disabled]="
+          saving() ||
+          mediaBusy() ||
+          uploadPending() ||
+          social()?.busy() ||
+          (state() !== 'ready' && state() !== 'empty')
+        "
+      >
+        {{ saving() ? 'Guardando…' : 'Guardar cambios' }}
+      </button>
+    }
+  </div>
+</header>
+<div class="profile-content" tabindex="0" role="region" aria-label="Edición del perfil">
+  @if (state() === 'loading') {
+    <p role="status">Cargando perfil…</p>
+  }
+  @if (error()) {
+    <p role="alert" class="error">{{ error() }}</p>
+  }
+  @if (state() === 'error') {
+    <button type="button" (click)="load()">Reintentar</button>
+  }
+  @if (state() === 'empty') {
+    <p>No hay un perfil configurado. Completa nombre y apellido para crearlo.</p>
+  }
+  @if (state() === 'ready' || state() === 'empty') {
+    <form id="profile-form" [formGroup]="form" (ngSubmit)="save()">
+      <fieldset class="photo-section" [disabled]="saving() || mediaBusy()">
+        <legend>Logo del portafolio</legend>
+        @if (mediaBusy()) {
+          <p role="status">Cargando logo...</p>
+        }
+        @if (mediaError()) {
+          <p role="alert" class="error">{{ mediaError() }}</p>
+          <button type="button" (click)="loadMedia()">Reintentar</button>
+        }
+        <div class="logo-layout">
+          @for (reference of [references[0]]; track reference.name) {
+            <div class="media-assignment profile-photo">
+              @if (assets()[reference.name]; as asset) {
+                <app-media-preview [asset]="asset" [autoload]="true" />
+                <p>{{ asset.title || asset.original_filename }}</p>
+              } @else {
+                <p>
+                  {{
+                    form.controls[reference.name].value
+                      ? 'Archivo asignado; detalle no disponible.'
+                      : 'Sin logo configurado.'
+                  }}
+                </p>
+              }
+              <div class="actions">
+                @if (form.controls[reference.name].value) {
+                  <button
+                    type="button"
+                    (click)="remove(reference.name)"
+                    [disabled]="uploadPending()"
+                  >
+                    Quitar del perfil
+                  </button>
+                }
+              </div>
+            </div>
+          }
+          <div
+            class="logo-dropzone"
+            role="group"
+            aria-label="Subir logo del portafolio"
+            (dragover)="$event.preventDefault()"
+            (dragenter)="logoDragEnter($event)"
+            (dragleave)="logoDragLeave($event)"
+            [class.drag-active]="logoDragActive() && !saving() && !mediaBusy() && !uploadPending()"
+            (drop)="logoDropped($event)"
+            [class.blocked]="saving() || mediaBusy() || uploadPending()"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <path d="M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5" />
+            </svg>
+            <strong>Añade el logo de tu portafolio</strong>
+            <p>Arrastra una imagen aquí o selecciónala desde tu equipo.</p>
+            <button
+              type="button"
+              class="primary"
+              (click)="openUpload('profile_media_id')"
+              [disabled]="saving() || mediaBusy() || uploadPending()"
+            >
+              Subir logo
+            </button>
+            <p class="help">JPEG, PNG, WebP y AVIF · Un archivo por subida</p>
+          </div>
+        </div>
+        <p class="help">
+          Sube un logo cuadrado o símbolo, preferiblemente PNG transparente de 512 × 512 px, con
+          poco espacio vacío alrededor. Se muestra completo, sin recortar, a 64 × 64 px en
+          escritorio y 48 × 48 px en móvil. Usa un diseño legible sobre fondos claros y fotografías.
+          Si no hay imagen disponible, la cabecera muestra tus iniciales.
+        </p>
+        <input
+          #photoInput
+          id="profile-photo-file"
+          type="file"
+          hidden
+          accept=".jpg,.jpeg,.png,.webp,.avif"
+          (change)="photoSelected($event)"
+        />
+        @if (uploadTarget() === 'profile_media_id') {
+          <app-media-upload
+            target="photo"
+            [compact]="true"
+            [selectedFile]="photoFile()"
+            (completed)="uploaded($event)"
+          />
+        }
+      </fieldset>
+      <fieldset [disabled]="saving()">
+        <legend>Información profesional y contacto</legend>
+        <div class="field-grid">
+          @for (field of fields; track field.name) {
+            <label
+              [class.wide]="field.large || field.name === 'professional_title'"
+              [attr.for]="'profile-' + field.name"
+              >{{ field.label }}{{ field.required ? ' *' : '' }}
+              @if (field.large) {
+                <textarea
+                  [id]="'profile-' + field.name"
+                  [formControlName]="field.name"
+                  [maxlength]="field.max"
+                  rows="5"
+                  [attr.aria-describedby]="field.name + '-error'"
+                  [attr.aria-invalid]="
+                    form.controls[field.name].invalid && form.controls[field.name].touched
+                  "
+                ></textarea>
+              } @else {
+                <input
+                  [type]="
+                    field.name === 'email' ? 'email' : field.name === 'phone' ? 'tel' : 'text'
+                  "
+                  [id]="'profile-' + field.name"
+                  [formControlName]="field.name"
+                  [maxlength]="field.max"
+                  [required]="field.required"
+                  [attr.aria-describedby]="field.name + '-error'"
+                  [attr.aria-invalid]="
+                    form.controls[field.name].invalid && form.controls[field.name].touched
+                  "
+                />
+              }
+              @if (form.controls[field.name].invalid && form.controls[field.name].touched) {
+                <span [id]="field.name + '-error'" class="field-error"
+                  >Revisa {{ field.label.toLowerCase() }}; máximo {{ field.max }} caracteres{{
+                    field.required ? ', obligatorio' : ''
+                  }}.</span
+                >
+              }
+            </label>
+          }
+        </div>
+      </fieldset>
+    </form>
+    @if (profile()) {
+      <app-social-links [locked]="saving()" />
+    }
+  }
+</div>
+@if (picker(); as target) {
+  <app-project-media-picker
+    [mediaType]="target === 'profile_media_id' ? 'IMAGE' : null"
+    [allowedTypes]="target === 'cv_media_id' ? cvTypes : null"
+    (selected)="select($event)"
+    (closed)="picker.set(null)"
+  />
+}
+<app-content-leave-confirm />

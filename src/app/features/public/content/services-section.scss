@@ -1,0 +1,86 @@
+@use '../../../shared/public/public-design' as design;
+:host {
+  display: block;
+}
+section {
+  padding: var(--public-section-space) var(--public-gutter);
+  background: var(--public-secondary);
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: clamp(40px, 6vw, 96px);
+  scroll-margin-top: var(--public-header-height);
+}
+.label,
+.number,
+button {
+  @include design.label;
+}
+h2 {
+  font: 500 clamp(35px, 4vw, 60px)/1.1 var(--public-font-display);
+  letter-spacing: -0.035em;
+  margin: 24px 0;
+  text-transform: uppercase;
+}
+h2 span {
+  color: var(--public-primary);
+}
+article {
+  border-bottom: 1px solid var(--public-border);
+  padding: 24px 0;
+}
+article:first-child {
+  border-top: 1px solid var(--public-border);
+}
+summary,
+.service-name {
+  display: flex;
+  gap: 24px;
+  align-items: baseline;
+}
+summary {
+  cursor: pointer;
+  list-style: none;
+}
+summary::-webkit-details-marker {
+  display: none;
+}
+h3 {
+  font: 400 clamp(22px, 2.2vw, 32px)/1.35 var(--public-font-display);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.arrow {
+  margin-left: auto;
+  font-size: 24px;
+}
+.number {
+  flex-shrink: 0;
+}
+p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--public-muted-foreground);
+  font-size: 14px;
+  line-height: 1.8;
+  margin: 20px 0 0 38px;
+}
+summary:hover,
+details[open] summary {
+  color: var(--public-primary);
+}
+button {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  cursor: pointer;
+  padding: 12px 0;
+}
+summary:focus-visible,
+button:focus-visible {
+  @include design.focus;
+}
+@media (max-width: 63.999rem) {
+  section {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

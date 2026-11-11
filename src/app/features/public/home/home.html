@@ -1,0 +1,45 @@
+@if (hero(); as project) {
+  <app-project-spotlight [project]="project" [hero]="true" />
+} @else {
+  <section class="empty-hero" aria-labelledby="public-hero-heading">
+    <p>Portafolio / Proyectos</p>
+    <h1 id="public-hero-heading">Espacios.<br />Perspectivas.</h1>
+    <a href="#projects">Explorar el portafolio <span aria-hidden="true">&#8595;</span></a>
+  </section>
+}
+<section id="projects" class="selected" aria-labelledby="selected-heading">
+  <div class="section-heading">
+    <div>
+      <p class="label">01 / Portafolio</p>
+      <h2 id="selected-heading">
+        PROYECTOS SELECCIONADOS <span>({{ selected().length.toString().padStart(2, '0') }})</span>
+      </h2>
+    </div>
+    <a href="#project-index">Ver índice de proyectos <span aria-hidden="true">&#8599;</span></a>
+  </div>
+  @if (selected().length) {
+    <app-public-project-grid [projects]="selected()" />
+  } @else if (collection.loading()) {
+    <p role="status">Cargando proyectos seleccionados&hellip;</p>
+  } @else if (!collection.error()) {
+    <p>Aún no se han publicado proyectos.</p>
+  }
+</section>
+<section class="index-section">
+  <app-project-index (changed)="collection.load($event)" /><a
+    class="all-projects"
+    routerLink="/projects"
+    >Ver todos los proyectos <span aria-hidden="true">&#8599;</span></a
+  >
+</section>
+@if (featured(); as project) {
+  <app-project-spotlight [project]="project" />
+}
+@if (featuredError()) {
+  <p class="featured-error" role="status">
+    Los proyectos destacados no están disponibles temporalmente.
+    <button type="button" (click)="loadFeatured()">Reintentar</button>
+  </p>
+}
+<app-services-section />
+<app-contact-section />

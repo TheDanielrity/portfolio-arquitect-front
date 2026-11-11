@@ -1,0 +1,231 @@
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">Portafolio / Administración</p>
+    <h1>Proyectos</h1>
+    <p>Contenido, publicación y clasificación de tus proyectos.</p>
+  </div>
+  <a class="primary button" routerLink="new">Crear proyecto</a>
+</header>
+<nav class="editor-tabs" aria-label="Estado de proyectos">
+  <button
+    type="button"
+    [attr.aria-current]="!filters.controls.status.value ? 'true' : null"
+    (click)="statusFilter('')"
+  >
+    Todos
+  </button>
+  @for (s of statuses; track s.value) {
+    <button
+      type="button"
+      [attr.aria-current]="filters.controls.status.value === s.value ? 'true' : null"
+      (click)="statusFilter(s.value)"
+    >
+      {{ s.label }}
+    </button>
+  }
+</nav>
+<div class="view-controls">
+  <button type="button" [attr.aria-pressed]="view() === 'grid'" (click)="view.set('grid')">
+    Cuadrícula</button
+  ><button type="button" [attr.aria-pressed]="view() === 'list'" (click)="view.set('list')">
+    Lista
+  </button>
+</div>
+<form class="filters" [formGroup]="filters" (ngSubmit)="apply()">
+  <label
+    >Buscar<input
+      id="project-search"
+      formControlName="q"
+      maxlength="200"
+      placeholder="Título, slug o descripción"
+  /></label>
+  <label
+    >Estado<select formControlName="status">
+      <option value="">Todos</option>
+      @for (s of statuses; track s.value) {
+        <option [value]="s.value">{{ s.label }}</option>
+      }
+    </select></label
+  >
+  <label
+    >Visibilidad<select formControlName="visibility">
+      <option value="">Todas</option>
+      @for (v of visibilities; track v.value) {
+        <option [value]="v.value">{{ v.label }}</option>
+      }
+    </select></label
+  >
+  <label
+    >Destacado<select formControlName="is_featured">
+      <option value="">Todos</option>
+      <option value="true">Sí</option>
+      <option value="false">No</option>
+    </select></label
+  >
+  <label
+    >Categoría<select formControlName="category_id">
+      <option value="">Todas</option>
+      @for (c of categories(); track c.id) {
+        <option [value]="c.id">{{ c.name }}</option>
+      }
+    </select></label
+  >
+  <label
+    >Tag<select formControlName="tag_id">
+      <option value="">Todos</option>
+      @for (t of tags(); track t.id) {
+        <option [value]="t.id">{{ t.name }}</option>
+      }
+    </select></label
+  >
+  <label
+    >Orden<select formControlName="sort">
+      <option value="sort_order">Orden manual</option>
+      <option value="title">Título</option>
+      <option value="created_at">Creación</option>
+      <option value="updated_at">Actualización</option>
+    </select></label
+  >
+  <label
+    >Dirección<select formControlName="direction">
+      <option value="asc">Ascendente</option>
+      <option value="desc">Descendente</option>
+    </select></label
+  >
+  <button type="submit" [disabled]="filters.invalid">Aplicar filtros</button>
+</form>
+@if (error()) {
+  <p role="alert" class="error">{{ error() }}</p>
+  <button type="button" (click)="refresh()">Reintentar</button>
+}
+@if (retryAfter()) {
+  <p>Reintenta después de: {{ retryAfter() }}</p>
+}
+<p role="status">
+  @if (state() === 'loading') {
+    Cargando proyectos…
+  } @else if (state() === 'refreshing') {
+    Actualizando proyectos…
+  } @else if (state() === 'empty') {
+    No hay proyectos para estos filtros.
+  } @else if (page(); as p) {
+    {{ p.total }} proyectos
+  }
+</p>
+@if (page(); as p) {
+  @if (canReorder()) {
+    <p class="muted">
+      Arrastra las tarjetas para cambiar su orden. Los cambios se guardan al soltar.
+    </p>
+  } @else if (!reordering() && state() === 'loaded') {
+    <p class="muted">Para reordenar, quita los filtros y elige Orden manual y Ascendente.</p>
+  }
+  <p role="status">{{ reorderNotice() }}</p>
+  <p role="status">{{ featuredNotice() }}</p>
+  @if (featuredError()) {
+    <p role="alert" class="error">{{ featuredError() }}</p>
+  }
+  @if (reorderError()) {
+    <p role="alert" class="error">{{ reorderError() }}</p>
+  }
+  <div
+    cdkDropList
+    [cdkDropListOrientation]="view() === 'grid' ? 'mixed' : 'vertical'"
+    [cdkDropListDisabled]="!canReorder()"
+    (cdkDropListDropped)="drop($event)"
+    class="project-list"
+    [class.project-grid]="view() === 'grid'"
+    [class.reorderable]="canReorder()"
+    [attr.aria-busy]="state() === 'refreshing' || reordering() || !!featuring()"
+  >
+    @for (project of p.items; track project.id; let i = $index) {
+      <article
+        #projectCard
+        class="project-row"
+        cdkDrag
+        [cdkDragDisabled]="!canReorder()"
+        [cdkDragStartDelay]="{ mouse: 0, touch: 180 }"
+      >
+        <ng-template cdkDragPreview>
+          <div class="project-drag-thumbnail">
+            @if (previewImage(projectCard); as image) {
+              <img [src]="image" alt="" width="180" height="112" />
+            }
+            <strong>{{ project.title }}</strong>
+          </div>
+        </ng-template>
+        <button
+          type="button"
+          class="featured-toggle"
+          [class.is-featured]="project.is_featured"
+          [attr.aria-pressed]="!!project.is_featured"
+          [attr.aria-label]="featuredLabel(project) + ': ' + project.title"
+          [attr.title]="featuredLabel(project)"
+          [attr.aria-busy]="featuring() === project.id"
+          [disabled]="
+            !!featuring() ||
+            reordering() ||
+            state() !== 'loaded' ||
+            project.is_featured ||
+            project.status !== 'PUBLISHED' ||
+            project.visibility !== 'PUBLIC'
+          "
+          (pointerdown)="$event.stopPropagation()"
+          (mousedown)="$event.stopPropagation()"
+          (touchstart)="$event.stopPropagation()"
+          (click)="$event.stopPropagation(); feature(project)"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="1.6"
+            [attr.fill]="project.is_featured ? 'currentColor' : 'none'"
+          >
+            <path d="m12 3 2.8 5.7 6.3.9-4.5 4.4 1.1 6.2-5.7-3-5.7 3 1.1-6.2-4.5-4.4 6.3-.9Z" />
+          </svg>
+        </button>
+        @if (view() === 'grid') {
+          <app-project-cover [projectId]="project.id" />
+        }
+        <div>
+          <a
+            class="project-edit-link"
+            (keydown.alt.arrowup)="$event.preventDefault(); move(i, i - 1)"
+            (keydown.alt.arrowdown)="$event.preventDefault(); move(i, i + 1)"
+            [attr.aria-keyshortcuts]="canReorder() ? 'Alt+ArrowUp Alt+ArrowDown' : null"
+            [routerLink]="[project.id, 'edit']"
+            ><strong>{{ project.title }}</strong></a
+          >
+          <p class="muted">
+            {{ project.slug }}
+            @if (project.year) {
+              · {{ project.year }}
+            }
+          </p>
+        </div>
+        <div class="badges">
+          <span>{{ status(project.status ?? 'DRAFT') }}</span
+          ><span>{{ visibility(project.visibility ?? 'PUBLIC') }}</span>
+        </div>
+        <small>Actualizado {{ project.updated_at | date: 'dd/MM/yyyy' }}</small>
+      </article>
+    }
+  </div>
+  <nav class="pagination" aria-label="Paginación de proyectos">
+    <button
+      type="button"
+      (click)="paginate(-1)"
+      [disabled]="p.offset === 0 || state() === 'refreshing'"
+    >
+      Anterior</button
+    ><span>{{ p.total ? p.offset + 1 : 0 }}–{{ p.offset + p.items.length }} de {{ p.total }}</span
+    ><button
+      type="button"
+      (click)="paginate(1)"
+      [disabled]="p.offset + p.limit >= p.total || state() === 'refreshing'"
+    >
+      Siguiente
+    </button>
+  </nav>
+}

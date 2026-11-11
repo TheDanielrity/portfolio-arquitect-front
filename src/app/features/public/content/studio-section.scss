@@ -1,0 +1,110 @@
+@use '../../../shared/public/public-design' as design;
+:host {
+  display: block;
+}
+section {
+  padding: var(--public-section-space) var(--public-gutter);
+  scroll-margin-top: var(--public-header-height);
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--public-border);
+  margin-bottom: 56px;
+}
+.label,
+a,
+button {
+  @include design.label;
+}
+.studio-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: clamp(40px, 7vw, 112px);
+  align-items: start;
+}
+h2 {
+  font: 500 clamp(35px, 4.3vw, 68px)/1.1 var(--public-font-display);
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  margin: 0 0 24px;
+  overflow-wrap: anywhere;
+}
+h2 span {
+  color: var(--public-primary);
+}
+.profession {
+  font: 400 clamp(20px, 2.2vw, 30px)/1.4 var(--public-font-display);
+  margin: 0 0 32px;
+}
+.introduction,
+.biography {
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--public-muted-foreground);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-width: 42rem;
+}
+.biography {
+  margin-top: 32px;
+}
+figure {
+  margin: 48px 0 0;
+  min-width: 0;
+}
+.portrait {
+  aspect-ratio: 4 / 5;
+}
+figcaption {
+  margin-top: 16px;
+  color: var(--public-muted-foreground);
+}
+.links {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+a,
+button {
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--public-border);
+  padding: 12px 0;
+  text-decoration: none;
+  cursor: pointer;
+}
+a:hover,
+button:hover {
+  color: var(--public-primary);
+}
+a:focus-visible,
+button:focus-visible {
+  @include design.focus;
+}
+.text-only {
+  grid-template-columns: minmax(0, 1fr);
+}
+.muted {
+  color: var(--public-muted-foreground);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+@media (max-width: 63.999rem) {
+  .studio-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  figure {
+    margin: 0;
+    max-width: 600px;
+  }
+}

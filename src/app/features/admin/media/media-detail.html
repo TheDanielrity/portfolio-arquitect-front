@@ -1,0 +1,117 @@
+<dialog #dialog aria-labelledby="detail-title" (cancel)="close($event)">
+  <div class="section-heading">
+    <h2 id="detail-title">Detalle del archivo</h2>
+    <button type="button" (click)="close()" [disabled]="saving() || deleting()">Cerrar</button>
+  </div>
+  @if (loading()) {
+    <p role="status">Cargando detalle…</p>
+  }
+  @if (asset(); as item) {
+    <h3>{{ item.original_filename }}</h3>
+    <app-media-preview [asset]="item" [downloadable]="true" />
+    <dl>
+      <div>
+        <dt>Tipo</dt>
+        <dd>{{ item.type }}</dd>
+      </div>
+      <div>
+        <dt>MIME</dt>
+        <dd>{{ item.mime_type }}</dd>
+      </div>
+      <div>
+        <dt>Tamaño</dt>
+        <dd>{{ size(item.file_size) }}</dd>
+      </div>
+      @if (item.width && item.height) {
+        <div>
+          <dt>Dimensiones</dt>
+          <dd>{{ item.width }} × {{ item.height }}</dd>
+        </div>
+      }
+      <div>
+        <dt>Creado</dt>
+        <dd>{{ item.created_at | date: 'mediumDate' }}</dd>
+      </div>
+    </dl>
+    <form [formGroup]="form" (ngSubmit)="save()" aria-describedby="detail-error">
+      <label for="media-title">Título</label
+      ><input
+        id="media-title"
+        formControlName="title"
+        aria-describedby="title-error"
+        maxlength="255"
+        [attr.aria-invalid]="form.controls.title.invalid"
+      />
+      @if (form.controls.title.invalid) {
+        <p id="title-error" class="error">Revisa el título (máximo 255 caracteres).</p>
+      }
+      <label for="media-alt">Texto alternativo</label
+      ><input
+        id="media-alt"
+        formControlName="alt_text"
+        aria-describedby="alt-error"
+        maxlength="255"
+        [attr.aria-invalid]="form.controls.alt_text.invalid"
+      />
+      @if (form.controls.alt_text.invalid) {
+        <p id="alt-error" class="error">Revisa el texto alternativo (máximo 255 caracteres).</p>
+      }
+      <label for="media-description">Descripción</label
+      ><textarea
+        id="media-description"
+        formControlName="description"
+        aria-describedby="description-error"
+        rows="4"
+        maxlength="20000"
+        [attr.aria-invalid]="form.controls.description.invalid"
+      ></textarea>
+      @if (form.controls.description.invalid) {
+        <p id="description-error" class="error">
+          Revisa la descripción (máximo 20 000 caracteres).
+        </p>
+      }
+      <div class="actions">
+        <button class="primary" type="submit" [disabled]="saving() || deleting() || form.invalid">
+          {{ saving() ? 'Guardando…' : 'Guardar metadata' }}
+        </button>
+      </div>
+    </form>
+    <p role="status">{{ notice() }}</p>
+    <section class="delete-section" aria-label="Eliminar archivo">
+      @if (!deleteConfirmation()) {
+        <button
+          type="button"
+          class="danger"
+          (click)="deleteConfirmation.set(true)"
+          [disabled]="saving()"
+        >
+          Eliminar archivo
+        </button>
+      } @else {
+        <p>
+          ¿Eliminar «{{ item.title || item.original_filename }}»? Esta acción no se puede deshacer.
+          Los archivos utilizados no pueden eliminarse.
+        </p>
+        <div class="actions">
+          <button
+            type="button"
+            class="danger"
+            (click)="remove()"
+            [disabled]="deleting() || saving()"
+          >
+            {{ deleting() ? 'Eliminando…' : 'Confirmar eliminación' }}</button
+          ><button type="button" (click)="deleteConfirmation.set(false)" [disabled]="deleting()">
+            Conservar archivo
+          </button>
+        </div>
+      }
+    </section>
+  }
+  <p id="detail-error" role="alert" class="error">{{ error() }}</p>
+  @if (retryAfter(); as retry) {
+    <p>Reintenta después de: {{ retry }}</p>
+  }
+  @if (!loading() && !asset()) {
+    <button type="button" (click)="load()">Reintentar</button>
+  }
+</dialog>

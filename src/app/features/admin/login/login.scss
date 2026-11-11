@@ -1,0 +1,206 @@
+@use '../../../layouts/admin-layout/admin-theme' as theme;
+:host {
+  --login-muted: #343834;
+  --login-border: #8a8a8a;
+  --login-danger: #a12222;
+  --login-space: 1.5rem;
+  display: block;
+}
+.login {
+  max-width: 68rem;
+  padding: 2rem clamp(1.25rem, 5vw, 4rem);
+}
+.portfolio-link {
+  color: var(--color-text);
+  text-underline-offset: 0.25em;
+}
+section {
+  max-width: 28rem;
+  margin: clamp(3rem, 10vh, 7rem) auto;
+  border-top: 2px solid var(--color-text);
+  padding-top: 2rem;
+}
+.eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  color: var(--login-muted);
+}
+h1 {
+  font-size: clamp(1.9rem, 5vw, 2.6rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  margin: 0.75rem 0;
+}
+.intro {
+  color: var(--login-muted);
+  margin-bottom: 2.5rem;
+}
+.field {
+  margin-bottom: var(--login-space);
+}
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--login-border);
+  border-radius: 0;
+  color: var(--color-text);
+  background: var(--color-background);
+}
+input[aria-invalid='true'] {
+  border-color: var(--login-danger);
+}
+.field-error {
+  min-height: 1.25rem;
+  font-size: 0.8rem;
+  color: var(--login-danger);
+  margin: 0.35rem 0 0;
+}
+.request-error {
+  border-left: 2px solid var(--login-danger);
+  padding-left: 0.75rem;
+  color: var(--login-danger);
+}
+.retry {
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+button {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-text);
+  color: var(--color-background);
+  border: 1px solid var(--color-text);
+  cursor: pointer;
+}
+button:hover {
+  background: #444;
+}
+button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+:host {
+  @include theme.tokens;
+  min-height: 100dvh;
+  background: #fff;
+}
+.login-shell {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100dvh;
+}
+.login-visual {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  min-height: 100dvh;
+  background: #e8eadf;
+  padding: clamp(2rem, 5vw, 4rem);
+  overflow: hidden;
+}
+.architectural-lines {
+  position: absolute;
+  inset: 8% 10% 20%;
+  color: #a4ad91;
+}
+.architectural-lines svg {
+  width: 100%;
+  height: 100%;
+}
+.login-visual p {
+  position: relative;
+  font-family: var(--font-sans);
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+}
+.login-visual > span {
+  position: relative;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: var(--admin-muted);
+}
+.login {
+  width: 100%;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem;
+  background: var(--admin-background);
+}
+.portfolio-link {
+  font-size: 0.75rem;
+  color: var(--admin-muted);
+}
+section {
+  width: 100%;
+  max-width: 24rem;
+  border: 0;
+  margin: auto;
+  padding-block: 5rem;
+}
+h1 {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 2.5rem;
+}
+input {
+  border-color: var(--admin-field-border);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.95rem;
+}
+label {
+  color: var(--admin-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+input::placeholder {
+  color: var(--admin-muted);
+  opacity: 1;
+}
+input:hover:not(:disabled):not([readonly]) {
+  border-color: var(--admin-text);
+}
+input:focus-visible {
+  border-color: var(--admin-accent);
+}
+button {
+  border-radius: 6px;
+  background: var(--admin-accent);
+  border-color: var(--admin-accent);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+button:hover:not(:disabled) {
+  background: #55623e;
+}
+button:disabled {
+  opacity: 1;
+  color: var(--admin-muted);
+  background: var(--admin-hover);
+  border-color: var(--admin-border);
+}
+:focus-visible {
+  outline-color: var(--admin-accent);
+}
+@media (max-width: 900px) {
+  .login-shell {
+    grid-template-columns: 1fr;
+  }
+  .login-visual {
+    display: none;
+  }
+  .login {
+    min-height: 100dvh;
+    padding: 1.5rem;
+  }
+}

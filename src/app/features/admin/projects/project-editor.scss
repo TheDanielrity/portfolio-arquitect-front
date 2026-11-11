@@ -1,0 +1,160 @@
+@use '../../../layouts/admin-layout/admin-theme' as theme;
+@include theme.editor;
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+.editor-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding: 0 0.25rem 2rem;
+}
+.editor-content:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: -2px;
+}
+.page-heading {
+  padding-top: 2.5rem;
+  margin-bottom: 2rem;
+  align-items: start;
+}
+.page-heading h1 {
+  font-size: clamp(2rem, 3vw, 2.5rem);
+  font-weight: 600;
+  margin-top: 1rem;
+}
+.page-heading p {
+  max-width: 42rem;
+}
+fieldset {
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  border-radius: 6px;
+  padding: 1.25rem;
+  margin-block: 2.5rem;
+}
+legend {
+  padding: 0.25rem 0.5rem;
+  background: var(--admin-surface);
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+label {
+  color: var(--admin-text);
+  gap: 0.5rem;
+}
+input,
+select,
+textarea {
+  color: var(--admin-text);
+  border-radius: 3px;
+  font-size: 1rem;
+  min-height: 3.2rem;
+}
+textarea[formControlName='description'] {
+  min-height: 11rem;
+}
+#project-panel-seo .field-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+.page-heading a {
+  color: var(--admin-muted);
+  text-decoration: none;
+}
+.page-heading a:hover {
+  color: var(--admin-accent);
+  text-decoration: underline;
+}
+.field-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 2rem 1.75rem;
+}
+@media (max-width: 600px) {
+  .field-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.link-summary {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.link-summary p {
+  margin: 0.5rem 0;
+}
+.save-bar {
+  flex-shrink: 0;
+  justify-content: flex-end;
+  padding: 0 0 1rem;
+  margin-top: 0;
+}
+.save-notice {
+  flex-shrink: 0;
+  margin: 0 0 1rem;
+  color: var(--admin-accent);
+}
+.editor-tabs {
+  flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+  gap: 0.5rem 1.75rem;
+}
+.editor-tabs button {
+  font-size: 1rem;
+  font-weight: 700;
+  min-height: 2.75rem;
+}
+#project-panel-media,
+#project-panel-sections {
+  padding: 1.25rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: var(--admin-surface);
+  margin-block: 1.5rem;
+}
+@media (max-width: 600px) {
+  .page-heading {
+    padding-top: 1.5rem;
+  }
+  .field-grid {
+    gap: 1.5rem;
+  }
+  .editor-tabs button {
+    flex: 1 1 45%;
+    white-space: normal;
+    text-align: left;
+  }
+  .save-bar {
+    gap: 0.65rem;
+  }
+  .save-bar button {
+    width: 100%;
+  }
+}
+
+.seo-mode {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.seo-mode input {
+  width: auto;
+}
+.seo-preview {
+  margin-top: 2rem;
+  border-top: 1px solid var(--admin-border);
+  padding-top: 1rem;
+  max-width: 42rem;
+  overflow-wrap: anywhere;
+}
+.seo-preview-title {
+  font-size: 1.25rem;
+  color: #1a0dab;
+}

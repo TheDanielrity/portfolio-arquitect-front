@@ -1,0 +1,110 @@
+﻿@use '../../../shared/public/public-design' as design;
+:host {
+  display: block;
+  min-width: 0;
+}
+.preview {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.image {
+  aspect-ratio: 16 / 10;
+  position: relative;
+  overflow: hidden;
+  background: var(--public-muted);
+}
+app-public-cover {
+  transition: transform 1500ms ease;
+}
+.affordance {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 20px;
+  background: var(--public-background);
+  color: var(--public-foreground);
+  opacity: 0;
+  @include design.label;
+}
+.caption {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  margin-top: 20px;
+  align-items: start;
+}
+.number {
+  @include design.label;
+  color: var(--public-primary);
+  padding-top: 5px;
+}
+h3 {
+  font: 500 clamp(20px, 2vw, 28px)/1.15 var(--public-font-display);
+  margin: 0;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+  transition: transform 500ms ease;
+}
+p {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--public-muted-foreground);
+}
+.metadata {
+  @include design.label;
+  text-align: right;
+  max-width: 140px;
+  overflow-wrap: anywhere;
+}
+.metadata span {
+  display: inline-block;
+  margin-top: 8px;
+}
+a:focus-visible {
+  @include design.focus;
+}
+a:focus-visible .affordance {
+  opacity: 1;
+}
+@media (hover: hover) {
+  a:hover app-public-cover {
+    transform: scale(1.04);
+  }
+  a:hover .affordance {
+    opacity: 1;
+  }
+  a:hover h3 {
+    transform: translateX(5px);
+  }
+}
+@media (max-width: 47.999rem) {
+  .caption {
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+  }
+  .metadata {
+    grid-column: 2;
+    text-align: left;
+    max-width: none;
+  }
+  .metadata br {
+    display: none;
+  }
+  .metadata span {
+    margin: 0 0 0 12px;
+  }
+  .affordance {
+    bottom: 12px;
+    right: 12px;
+    padding: 10px 14px;
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  app-public-cover,
+  h3 {
+    transition: none;
+    transform: none !important;
+  }
+}

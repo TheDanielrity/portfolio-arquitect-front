@@ -1,0 +1,129 @@
+<section
+  id="project-index"
+  aria-labelledby="project-index-heading"
+  [attr.aria-busy]="collection.loading()"
+>
+  @if (title()) {
+    <h2 #heading id="project-index-heading" tabindex="-1">ÍNDICE DE PROYECTOS<span>.</span></h2>
+  } @else {
+    <h2 #heading id="project-index-heading" tabindex="-1" class="index-label">
+      Índice de proyectos
+    </h2>
+  }
+  <div class="filters" role="group" aria-label="Filtrar proyectos por categoría">
+    <button
+      type="button"
+      [attr.aria-pressed]="!collection.query().category"
+      (click)="filter(null)"
+      [disabled]="collection.loading()"
+    >
+      Todos
+    </button>
+    @for (category of collection.categories(); track category.slug) {
+      <button
+        type="button"
+        [attr.aria-pressed]="collection.query().category === category.slug"
+        [disabled]="collection.loading()"
+        (click)="filter(category.slug)"
+      >
+        {{ category.name }}
+      </button>
+    }
+  </div>
+  @if (collection.categoryError()) {
+    <div class="notice" role="alert">
+      <p>Las categorías no están disponibles temporalmente.</p>
+      <button type="button" (click)="collection.retryCategories()">Reintentar categorías</button>
+    </div>
+  }
+  @if (collection.categoryLoading()) {
+    <p class="notice" role="status">Cargando categorías…</p>
+  }
+  @if (collection.loading()) {
+    <p class="notice" role="status">
+      {{ collection.page() ? 'Actualizando proyectos…' : 'Cargando proyectos…' }}
+    </p>
+  }
+  @if (collection.error()) {
+    <div class="notice" role="alert">
+      <p>{{ errorMessage() }}</p>
+      @if (retryAfter()) {
+        <p>Reintenta después de: {{ retryAfter() }}</p>
+      }
+      <button type="button" (click)="collection.retry()" [disabled]="collection.loading()">
+        Reintentar
+      </button>
+    </div>
+  }
+  @if (collection.page(); as page) {
+    @if (!page.items.length && !collection.loading() && !collection.error()) {
+      <p class="empty" role="status">
+        {{
+          page.total > 0
+            ? 'No hay proyectos en esta página.'
+            : filtered()
+              ? 'No hay proyectos que coincidan con estos filtros.'
+              : 'Aún no se han publicado proyectos.'
+        }}
+      </p>
+      @if (page.total > 0) {
+        <button type="button" (click)="paginate(0)">Volver a la primera página</button>
+      }
+    }
+    @if (page.items.length) {
+      <div class="index-head" aria-hidden="true">
+        <span>Proyecto</span><span>Categoría</span><span>Ubicación</span><span>Año</span>
+      </div>
+      <ol class="index-rows" [attr.start]="page.offset + 1">
+        @for (project of page.items; track project.slug; let i = $index) {
+          <li>
+            <a
+              [routerLink]="['/projects', project.slug]"
+              (pointermove)="move($event, project)"
+              (pointerleave)="hidePreview()"
+              (blur)="hidePreview()"
+              ><span class="row-title"
+                ><span class="sequence">{{
+                  (page.offset + i + 1).toString().padStart(2, '0')
+                }}</span
+                >{{ project.title }}</span
+              ><span class="category">{{ project.categories[0]?.name }}</span
+              ><span class="location">{{ project.location }}</span
+              ><span class="year">{{ project.year }} <span aria-hidden="true">↗</span></span></a
+            >
+          </li>
+        }
+      </ol>
+    }
+    @if (page.total > page.limit && page.items.length) {
+      <nav class="pagination" aria-label="Páginas de proyectos">
+        <button
+          type="button"
+          [disabled]="collection.loading() || page.offset === 0"
+          (click)="paginate(Math.max(0, page.offset - page.limit))"
+        >
+          Anterior</button
+        ><span
+          >{{ page.offset + 1 }}–{{ Math.min(page.offset + page.limit, page.total) }} /
+          {{ page.total }}</span
+        ><button
+          type="button"
+          [disabled]="collection.loading() || page.offset + page.limit >= page.total"
+          (click)="paginate(page.offset + page.limit)"
+        >
+          Siguiente
+        </button>
+      </nav>
+    }
+  }
+  @if (preview(); as project) {
+    <div
+      class="floating-preview"
+      aria-hidden="true"
+      [style.left.px]="point().x"
+      [style.top.px]="point().y"
+    >
+      <app-public-cover [media]="project.cover" [title]="''" />
+    </div>
+  }
+</section>

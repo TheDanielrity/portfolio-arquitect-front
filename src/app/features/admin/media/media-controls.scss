@@ -1,0 +1,139 @@
+@use '../../../layouts/admin-layout/admin-theme' as theme;
+:host {
+  display: block;
+  min-width: 0;
+  color: var(--admin-text);
+}
+h3 {
+  overflow-wrap: anywhere;
+}
+p {
+  color: var(--admin-muted);
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.error {
+  color: #8b302a;
+  overflow-wrap: anywhere;
+}
+.error:empty {
+  display: none;
+}
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.section-heading span {
+  font-size: 0.8rem;
+  color: var(--admin-muted);
+}
+.upload-panel {
+  border-block: 1px solid var(--admin-border);
+  padding: 1.5rem 0;
+  margin: 1.5rem 0 2rem;
+}
+.upload-panel p {
+  font-size: 0.85rem;
+}
+.upload-panel.compact {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+input[type='file'] {
+  max-width: 38rem;
+  padding: 0.5rem;
+}
+.upload-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.5rem;
+  margin-top: 1rem;
+  overflow-wrap: anywhere;
+}
+.upload-status span {
+  color: var(--admin-muted);
+}
+progress {
+  width: min(100%, 38rem);
+  margin-top: 0.75rem;
+  accent-color: var(--admin-accent);
+}
+dialog {
+  width: min(40rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 1.5rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 3px;
+  color: var(--admin-text);
+  overflow-y: auto;
+}
+dialog::backdrop {
+  background: rgb(25 35 28 / 45%);
+}
+dialog form {
+  display: grid;
+  gap: 0.5rem;
+}
+dialog form label {
+  margin-top: 0.7rem;
+}
+dialog .delete-section {
+  border-top: 1px solid var(--admin-border);
+  padding-top: 1rem;
+  margin-top: 1.5rem;
+}
+dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+  font-size: 0.85rem;
+}
+dt {
+  color: var(--admin-muted);
+}
+dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 30rem) {
+  dialog {
+    padding: 1rem;
+  }
+  .section-heading {
+    align-items: flex-start;
+  }
+}
+
+@include theme.controls;
+
+button {
+  border: 1.5px solid var(--admin-field-border);
+  background: #fff;
+  color: inherit;
+  cursor: pointer;
+}
+input,
+select,
+textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--admin-field-border);
+  background: #fff;
+  color: var(--admin-text);
+}
+label {
+  display: block;
+  margin-bottom: 0.45rem;
+}

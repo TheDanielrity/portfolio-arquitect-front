@@ -1,0 +1,205 @@
+<section aria-labelledby="sections-title">
+  <header class="page-heading" [class.ordering-heading]="ordering()">
+    <div>
+      <h2 id="sections-title">Secciones</h2>
+      <p>Organiza la historia de tu proyecto con texto y galerías de imágenes.</p>
+      <p class="muted">
+        {{
+          ordering()
+            ? 'Arrastra desde el ícono de la izquierda. Acerca la sección a los bordes para desplazarte. Guarda los cambios del proyecto para aplicar el orden.'
+            : 'Activa Ordenar secciones para cambiar su posición.'
+        }}
+      </p>
+    </div>
+    <button
+      type="button"
+      class="order-sections-toggle"
+      (click)="toggleOrdering()"
+      [attr.aria-pressed]="ordering()"
+      [disabled]="busy() || locked() || !!editing() || dragging() || sections().length < 2"
+    >
+      {{ ordering() ? 'Terminar de ordenar' : 'Ordenar secciones' }}
+    </button>
+  </header>
+  @if (!ordering()) {
+    <div class="actions">
+      <label
+        >Tipo de nueva sección<select
+          #newType
+          (change)="newSectionType.set(types[newType.selectedIndex])"
+        >
+          @for (t of types; track t) {
+            <option [value]="t">{{ policies[t].label }}</option>
+          }
+        </select></label
+      ><button
+        type="button"
+        (click)="open(null, types[newType.selectedIndex])"
+        [disabled]="busy() || locked()"
+      >
+        Agregar sección
+      </button>
+    </div>
+    <p class="muted">{{ descriptions[newSectionType()] }}</p>
+  }
+  @if (loading()) {
+    <p role="status">Cargando secciones…</p>
+  }
+  <p role="status" aria-live="polite">
+    {{ writing() ? 'Guardando cambios de secciones…' : notice() }}
+  </p>
+  @if (error()) {
+    <p role="alert" class="error">{{ error() }}</p>
+    <button type="button" (click)="load()" [disabled]="loading()">Actualizar secciones</button>
+  }
+  <ol
+    class="section-list"
+    [class.ordering]="ordering()"
+    cdkDropList
+    [cdkDropListData]="sections()"
+    [cdkDropListDisabled]="!ordering() || busy() || locked() || hasChanges()"
+    [cdkDropListAutoScrollStep]="12"
+    (cdkDropListDropped)="drop($event)"
+  >
+    @for (section of sections(); track section.id; let i = $index) {
+      <li
+        class="section-row"
+        cdkDrag
+        [cdkDragDisabled]="!ordering() || busy() || locked() || hasChanges()"
+        [cdkDragStartDelay]="{ mouse: 0, touch: 180 }"
+        (cdkDragStarted)="dragging.set(true)"
+        (cdkDragEnded)="dragging.set(false)"
+      >
+        <ng-template cdkDragPreview>
+          <div class="section-drag-preview">
+            <span>{{ policies[section.section_type].label }}</span>
+            <strong>{{ section.title || 'Sin título' }}</strong>
+          </div>
+        </ng-template>
+        @if (ordering()) {
+          <button
+            type="button"
+            cdkDragHandle
+            class="section-drag-handle"
+            [disabled]="busy() || locked() || hasChanges()"
+            [attr.aria-label]="
+              'Mover sección ' + (section.title || policies[section.section_type].label)
+            "
+            aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown"
+            (keydown.alt.arrowup)="$event.preventDefault(); move(i, -1)"
+            (keydown.alt.arrowdown)="$event.preventDefault(); move(i, 1)"
+            title="Arrastrar para reordenar. Alt y flechas arriba o abajo para mover con teclado."
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+              <circle cx="8" cy="5" r="1.5" />
+              <circle cx="16" cy="5" r="1.5" />
+              <circle cx="8" cy="12" r="1.5" />
+              <circle cx="16" cy="12" r="1.5" />
+              <circle cx="8" cy="19" r="1.5" />
+              <circle cx="16" cy="19" r="1.5" />
+            </svg>
+          </button>
+        }
+        <div class="section-summary">
+          <p class="section-kind">
+            Sección {{ i + 1 }} · {{ policies[section.section_type].label }}
+          </p>
+          <h3 class="section-title">{{ section.title || 'Sin título' }}</h3>
+          @if (!ordering()) {
+            <aside class="section-visibility" aria-label="Visibilidad de la sección">
+              <p class="visibility-label">
+                <span aria-hidden="true">{{ section.is_visible ? '✓' : '—' }}</span>
+                {{
+                  section.is_visible
+                    ? 'Se mostrará en la página del proyecto'
+                    : 'Oculta en la página del proyecto'
+                }}
+              </p>
+              @if (!section.is_visible) {
+                <p class="visibility-help">
+                  Solo visible en administración. El contenido se conserva; usa «Mostrar en el
+                  proyecto» para volver a mostrar esta sección.
+                </p>
+              }
+            </aside>
+            <app-section-preview [projectId]="projectId()" [section]="section" />
+          }
+        </div>
+        @if (!ordering()) {
+          <div class="section-actions">
+            <button
+              class="primary"
+              type="button"
+              (click)="open(section, section.section_type)"
+              [disabled]="busy() || locked()"
+            >
+              Editar sección</button
+            ><button
+              type="button"
+              (click)="visibility(section)"
+              [disabled]="busy() || locked() || hasChanges()"
+            >
+              {{ section.is_visible ? 'Ocultar en el proyecto' : 'Mostrar en el proyecto' }}
+            </button>
+            <fieldset class="section-order">
+              <legend>Orden de la sección</legend>
+              <button
+                type="button"
+                (click)="move(i, -1)"
+                [disabled]="i === 0 || busy() || locked() || hasChanges()"
+              >
+                Subir sección</button
+              ><button
+                type="button"
+                (click)="move(i, 1)"
+                [disabled]="i === sections().length - 1 || busy() || locked() || hasChanges()"
+              >
+                Bajar sección
+              </button>
+            </fieldset>
+            <div class="section-delete">
+              <button type="button" (click)="remove(section)" [disabled]="busy() || locked()">
+                Eliminar sección
+              </button>
+            </div>
+          </div>
+        }
+      </li>
+    } @empty {
+      @if (!loading() && !error()) {
+        <p>Aún no has organizado la presentación. Agrega tu primera sección para comenzar.</p>
+      }
+    }
+  </ol>
+  @if (editing(); as current) {
+    @for (item of [current]; track item) {
+      <app-project-edit-modal
+        [title]="item.section ? 'Editar sección' : 'Agregar sección'"
+        [blocked]="busy()"
+        (cancelled)="cancel()"
+      >
+        <app-section-editor
+          [projectId]="projectId()"
+          [section]="item.section"
+          [type]="item.type"
+          [order]="nextOrder()"
+          [locked]="locked() || writing()"
+          (saved)="saved()"
+          (cancelled)="cancel()"
+        />
+      </app-project-edit-modal>
+    }
+  }
+</section>
+@if (confirmation(); as c) {
+  <app-project-confirm
+    [title]="c.kind === 'delete' ? 'Eliminar sección' : 'Cambios sin guardar'"
+    [message]="
+      c.kind === 'delete'
+        ? 'Se eliminarán la sección y sus archivos asociados. Los archivos de la biblioteca se conservan.'
+        : '¿Descartar los cambios de esta sección?'
+    "
+    [action]="c.kind === 'delete' ? 'Eliminar sección' : 'Descartar cambios'"
+    (answer)="answer($event)"
+  />
+}

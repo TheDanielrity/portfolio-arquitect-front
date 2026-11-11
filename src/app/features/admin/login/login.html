@@ -1,0 +1,71 @@
+<div class="login-shell">
+  <aside class="login-visual" aria-label="Espacio privado de administración">
+    <div class="architectural-lines" aria-hidden="true">
+      <svg viewBox="0 0 400 500" fill="none" stroke="currentColor" stroke-width="1">
+        <path
+          d="M40 450h320M80 450V160l130-70 110 70v290M80 160h240M130 450V260h70v190M240 250h40v70h-40M80 200h240M210 90v110M45 480h310"
+        />
+      </svg>
+    </div>
+    <p>Tu arquitectura.<br />Una presentación cuidada.</p>
+    <span>PORTFOLIO ADMIN</span>
+  </aside>
+  <main class="login">
+    <a routerLink="/" class="portfolio-link">← Volver al portafolio</a>
+    <section aria-labelledby="login-title">
+      <p class="eyebrow">PORTAFOLIO / ACCESO PRIVADO</p>
+      <h1 id="login-title">Administración</h1>
+      <p class="intro">Inicia sesión para acceder a tu espacio de trabajo.</p>
+      <form [formGroup]="form" (ngSubmit)="submit()" [attr.aria-busy]="busy()" novalidate>
+        <div class="field">
+          <label for="email">Correo electrónico</label>
+          <input
+            id="email"
+            type="text"
+            inputmode="email"
+            autocomplete="username"
+            formControlName="email"
+            maxlength="320"
+            autocapitalize="none"
+            spellcheck="false"
+            [readOnly]="busy()"
+            [attr.aria-invalid]="invalid('email')"
+            aria-describedby="email-error"
+          />
+          <p id="email-error" class="field-error">
+            {{ invalid('email') ? 'Introduce tu correo (máximo 320 caracteres).' : '' }}
+          </p>
+        </div>
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <input
+            id="password"
+            type="password"
+            autocomplete="current-password"
+            formControlName="password"
+            maxlength="1024"
+            [readOnly]="busy()"
+            [attr.aria-invalid]="invalid('password')"
+            aria-describedby="password-error"
+          />
+          <p id="password-error" class="field-error">
+            {{ invalid('password') ? 'Introduce tu contraseña.' : '' }}
+          </p>
+        </div>
+        <div aria-live="polite" aria-atomic="true">
+          @if (error()) {
+            <p class="request-error">{{ error() }}</p>
+            @if (retryAfter()) {
+              <p class="retry">
+                Espera indicada por el servidor: {{ retryAfter() }} (segundos o fecha HTTP).
+              </p>
+            }
+          }
+        </div>
+        <button type="submit" [disabled]="busy()">
+          {{ busy() ? 'Iniciando sesión…' : 'Iniciar sesión' }}
+        </button>
+      </form>
+    </section>
+  </main>
+</div>

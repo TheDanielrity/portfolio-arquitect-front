@@ -1,0 +1,45 @@
+<section id="services" aria-labelledby="services-heading">
+  <div class="heading">
+    <span class="label">04 / Servicios</span>
+    <h2 id="services-heading">Servicios<span>.</span></h2>
+  </div>
+  <div class="service-list">
+    @for (service of content.services.value(); track service.slug; let index = $index) {
+      <article>
+        @if (service.description && service.description !== service.short_description) {
+          <details>
+            <summary>
+              <span class="number">{{ (index + 1).toString().padStart(2, '0') }}</span>
+              <h3>{{ service.name }}</h3>
+              <span class="arrow" aria-hidden="true">↗</span>
+            </summary>
+            @if (service.short_description) {
+              <p>{{ service.short_description }}</p>
+            }
+            <p class="description">{{ service.description }}</p>
+          </details>
+        } @else {
+          <div class="service-name">
+            <span class="number">{{ (index + 1).toString().padStart(2, '0') }}</span>
+            <h3>{{ service.name }}</h3>
+          </div>
+          @if (service.short_description || service.description) {
+            <p>{{ service.short_description || service.description }}</p>
+          }
+        }
+      </article>
+    } @empty {
+      @if (content.services.loading()) {
+        <p role="status">Cargando servicios…</p>
+      } @else if (!content.services.error()) {
+        <p class="muted">Aún no se han publicado servicios.</p>
+      }
+    }
+    @if (content.services.error()) {
+      <p role="status">
+        Los servicios no están disponibles temporalmente.
+        <button type="button" (click)="content.services.load()">Reintentar</button>
+      </p>
+    }
+  </div>
+</section>

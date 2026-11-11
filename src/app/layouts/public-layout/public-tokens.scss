@@ -1,0 +1,27 @@
+@mixin tokens {
+  --public-background: #f8f8f5;
+  --public-foreground: #20211e;
+  --public-primary: #ac3c29;
+  --public-primary-foreground: #ffffff;
+  --public-secondary: #ecece6;
+  --public-muted: #e6e6df;
+  --public-muted-foreground: #65665f;
+  --public-border: #cdcec6;
+  --public-ring: #ac3c29;
+  --public-dark: #22241f;
+  --public-dark-foreground: #f4f4ec;
+  --public-radius: 0px;
+  --public-font-display: var(--font-sans);
+  --public-font-body: var(--font-sans);
+  --public-font-mono: var(--font-sans);
+  --public-gutter: 24px;
+  --public-section-space: clamp(64px, 8vw, 128px);
+  --public-grid-gap: clamp(24px, 3vw, 48px);
+  --public-header-height: 88px;
+  @media (min-width: 48rem) {
+    --public-gutter: 48px;
+  }
+  @media (min-width: 64rem) {
+    --public-gutter: 64px;
+  }
+}

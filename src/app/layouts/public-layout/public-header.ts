@@ -1,0 +1,75 @@
+import { DOCUMENT } from '@angular/common';
+import {
+  afterNextRender,
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  inject,
+  input,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
+import { PublicMobileMenu } from './public-mobile-menu';
+import { PUBLIC_NAVIGATION } from './public-navigation';
+import { PublicContentState, publicUrl } from '../../features/public/content/public-content-state';
+import { PublicMediaDelivery } from '../../features/public/project-detail/public-media-delivery';
+@Component({
+  selector: 'app-public-header',
+  imports: [RouterLink, PublicMobileMenu],
+  templateUrl: './public-header.html',
+  styleUrl: './public-header.scss',
+})
+export class PublicHeader {
+  private readonly delivery = inject(PublicMediaDelivery);
+  readonly content = inject(PublicContentState);
+  readonly failedLogo = signal<string | null>(null);
+  readonly logoUrl = computed(() => {
+    const media = this.content.profile.value()?.profile_media;
+    return media?.type === 'IMAGE' ? publicUrl(this.delivery.url(media)) : null;
+  });
+  readonly initials = computed(() =>
+    this.content
+      .name()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0])
+      .join('')
+      .toUpperCase(),
+  );
+  private readonly document = inject(DOCUMENT);
+  private readonly destroy = inject(DestroyRef);
+  private readonly menu = viewChild(PublicMobileMenu);
+  private readonly brand = viewChild<ElementRef<HTMLAnchorElement>>('brand');
+  readonly overHero = input(false);
+  readonly scrolled = signal(false);
+  readonly opened = computed(() => this.menu()?.opened() ?? false);
+  readonly solid = computed(() => !this.overHero() || this.scrolled() || this.opened());
+  readonly items = PUBLIC_NAVIGATION;
+  constructor() {
+    inject(Router)
+      .events.pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroy),
+      )
+      .subscribe(() => this.menu()?.close(false));
+    afterNextRender(() => {
+      const view = this.document.defaultView;
+      if (!view) return;
+      const update = () => this.scrolled.set(view.scrollY > 50);
+      update();
+      view.addEventListener('scroll', update, { passive: true });
+      this.destroy.onDestroy(() => view.removeEventListener('scroll', update));
+    });
+  }
+  openMenu(): void {
+    this.menu()?.open();
+  }
+  focusBrand(): void {
+    this.brand()?.nativeElement.focus();
+  }
+}

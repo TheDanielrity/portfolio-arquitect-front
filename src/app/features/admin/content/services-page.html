@@ -1,0 +1,137 @@
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">Contenido global</p>
+    <h1>Servicios</h1>
+    <p>Gestiona los servicios, su visibilidad y orden.</p>
+  </div>
+  <button type="button" (click)="open('new')" [disabled]="busy()">Crear servicio</button>
+</header>
+<p role="status">
+  {{ writing() ? 'Guardando servicios…' : loading() ? 'Cargando servicios…' : notice() }}
+</p>
+@if (error()) {
+  <p role="alert" class="error">{{ error() }}</p>
+  @if (!editing()) {
+    <button type="button" (click)="load()" [disabled]="busy()">Actualizar servicios</button>
+  }
+}
+<ol class="content-list">
+  @for (item of items(); track item.id; let i = $index) {
+    <li class="content-row">
+      <div class="content-summary">
+        <strong>{{ i + 1 }}. {{ item.name }}</strong>
+        <p>{{ item.slug }} · {{ item.is_visible ? 'Visible' : 'Oculto' }}</p>
+        @if (item.short_description) {
+          <p>{{ item.short_description }}</p>
+        }
+      </div>
+      <div class="actions">
+        <button type="button" (click)="open(item)" [disabled]="busy()">Editar servicio</button
+        ><button type="button" (click)="visibility(item)" [disabled]="busy() || !!editing()">
+          {{ item.is_visible ? 'Ocultar' : 'Mostrar' }}</button
+        ><button type="button" (click)="move(i, -1)" [disabled]="i === 0 || busy() || !!editing()">
+          Subir servicio</button
+        ><button
+          type="button"
+          (click)="move(i, 1)"
+          [disabled]="i === items().length - 1 || busy() || !!editing()"
+        >
+          Bajar servicio</button
+        ><button type="button" (click)="remove(item)" [disabled]="busy() || !!editing()">
+          Eliminar servicio
+        </button>
+      </div>
+    </li>
+  } @empty {
+    @if (!loading() && !error()) {
+      <p>Aún no has agregado servicios. Crea el primero para presentar lo que ofreces.</p>
+    }
+  }
+</ol>
+@if (editing()) {
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <fieldset [disabled]="writing()">
+      <legend>{{ editing() === 'new' ? 'Nuevo servicio' : 'Editar servicio' }}</legend>
+      <div class="field-grid">
+        <label
+          >Nombre *<input
+            formControlName="name"
+            maxlength="150"
+            required
+            aria-describedby="name-error"
+          />
+          @if (form.controls.name.invalid && form.controls.name.touched) {
+            <span id="name-error" class="field-error"
+              >Nombre obligatorio, máximo 150 caracteres.</span
+            >
+          }
+        </label>
+        <label
+          >Enlace del servicio *<input
+            formControlName="slug"
+            maxlength="170"
+            required
+            aria-describedby="slug-error"
+          />
+          @if (form.controls.slug.invalid && form.controls.slug.touched) {
+            <span id="slug-error" class="field-error"
+              >Usa letras minúsculas, números y guiones; máximo 170 caracteres.</span
+            >
+          }
+        </label>
+        <label class="wide"
+          >Resumen del servicio<textarea
+            formControlName="short_description"
+            rows="3"
+            maxlength="300"
+            aria-describedby="short_description-error"
+          ></textarea>
+          @if (form.controls.short_description.invalid) {
+            <span id="short_description-error" class="field-error"
+              >Revisa la descripción breve, máximo 300 caracteres.</span
+            >
+          }
+        </label>
+        <label class="wide"
+          >Descripción completa<textarea
+            formControlName="description"
+            rows="6"
+            maxlength="20000"
+            aria-describedby="description-error"
+          ></textarea>
+          @if (form.controls.description.invalid) {
+            <span id="description-error" class="field-error"
+              >Revisa la descripción, máximo 20000 caracteres.</span
+            >
+          }
+        </label>
+        <label
+          >Identificador de icono opcional<input
+            formControlName="icon"
+            maxlength="100"
+            aria-describedby="icon-error"
+          />
+          @if (form.controls.icon.invalid) {
+            <span id="icon-error" class="field-error"
+              >Usa letras, números, guion o guion bajo; máximo 100 caracteres.</span
+            >
+          }</label
+        ><label class="choice"><input formControlName="is_visible" type="checkbox" />Visible</label>
+      </div>
+    </fieldset>
+    <div class="actions">
+      <button type="submit" class="primary" [disabled]="busy()">
+        {{ writing() ? 'Guardando…' : 'Guardar servicio' }}</button
+      ><button type="button" (click)="cancel()" [disabled]="busy()">Cancelar edición</button>
+    </div>
+  </form>
+}
+@if (confirmation(); as c) {
+  <app-project-confirm
+    title="Confirmar acción"
+    [message]="c.message"
+    action="Confirmar"
+    (answer)="answer($event)"
+  />
+}
+<app-content-leave-confirm />

@@ -1,0 +1,164 @@
+@use '../../../layouts/admin-layout/admin-theme' as theme;
+@include theme.editor;
+.project-list {
+  background: #fff;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+}
+.reorderable .project-row,
+.reorderable .project-edit-link {
+  cursor: grab;
+}
+.cdk-drag-placeholder {
+  opacity: 0.3;
+}
+.cdk-drag-preview {
+  box-sizing: border-box;
+  font-family: var(--font-sans);
+  background: #fff;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+}
+.project-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(10rem, auto) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.25rem 4.5rem 1.25rem 1.25rem;
+  border-top: 1px solid var(--admin-border);
+}
+.project-drag-thumbnail {
+  width: 180px;
+  max-width: 45vw;
+  overflow: hidden;
+  pointer-events: none;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 16%);
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: contain;
+    background: var(--admin-hover, #eceee8);
+  }
+  strong {
+    display: block;
+    padding: 0.65rem;
+    font-size: 0.75rem;
+    overflow-wrap: anywhere;
+  }
+}
+.project-row a {
+  color: inherit;
+}
+.project-edit-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+.project-edit-link:focus-visible::after {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 2px;
+}
+.project-row strong {
+  overflow-wrap: anywhere;
+}
+.project-row p {
+  margin: 0.4rem 0 0;
+}
+.badges {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.badges span {
+  padding: 0.3rem 0.5rem;
+  background: var(--admin-selected);
+  color: var(--admin-accent);
+  border-radius: 3px;
+  font-size: 0.65rem;
+}
+.view-controls {
+  display: flex;
+  justify-content: end;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.view-controls button[aria-pressed='true'] {
+  background: var(--admin-selected);
+  color: var(--admin-accent);
+}
+.project-grid {
+  background: transparent;
+  border: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+.project-grid .project-row {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+}
+.featured-toggle {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  background: #fff;
+  color: var(--admin-muted);
+  touch-action: manipulation;
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  &.is-featured {
+    color: var(--admin-accent);
+    background: var(--admin-selected);
+    opacity: 1;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--admin-accent);
+    outline-offset: 3px;
+  }
+}
+.project-grid app-project-cover {
+  width: calc(100% + 3rem);
+  margin: -1.5rem -1.5rem 0.5rem;
+}
+@media (max-width: 1100px) {
+  .project-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .project-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .badges {
+    grid-column: 1/-1;
+  }
+}
+@media (max-width: 600px) {
+  .project-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.project-row a {
+  text-decoration: none;
+}
+.project-row a:hover {
+  text-decoration: underline;
+}

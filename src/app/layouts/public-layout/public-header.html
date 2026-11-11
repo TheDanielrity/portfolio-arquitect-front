@@ -1,0 +1,43 @@
+<header [class.solid]="solid()">
+  <a #brand routerLink="/" class="public-brand" [attr.aria-label]="content.name() + ' — Inicio'">
+    @if (logoUrl(); as url) {
+      @if (failedLogo() !== url) {
+        <img
+          class="brand-logo"
+          [src]="url"
+          alt=""
+          width="64"
+          height="64"
+          loading="eager"
+          decoding="async"
+          (error)="failedLogo.set(url)"
+        />
+      } @else {
+        <span class="brand-symbol" aria-hidden="true">{{ initials() }}</span>
+      }
+    } @else {
+      <span class="brand-symbol" aria-hidden="true">{{ initials() }}</span>
+    }
+  </a>
+  <nav class="desktop-navigation" aria-label="Navegación principal">
+    @for (item of items; track item.href) {
+      <a routerLink="/" [fragment]="item.href.split('#')[1]"
+        >{{ item.label }}
+        @if (item.label === 'Contacto') {
+          <span aria-hidden="true">↗</span>
+        }
+      </a>
+    }
+  </nav>
+  <button
+    class="menu-trigger"
+    type="button"
+    aria-controls="public-mobile-menu"
+    [attr.aria-expanded]="opened()"
+    (click)="openMenu()"
+    aria-label="Abrir navegación"
+  >
+    Menú <span aria-hidden="true">+</span>
+  </button>
+</header>
+<app-public-mobile-menu (desktop)="focusBrand()" />

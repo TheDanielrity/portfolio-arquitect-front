@@ -1,0 +1,225 @@
+<section class="whatsapp-section" aria-labelledby="whatsapp-title">
+  <h2 id="whatsapp-title">WhatsApp</h2>
+  <p>Permite que los visitantes te contacten desde el botón flotante del portafolio.</p>
+  <form [formGroup]="whatsappForm">
+    <fieldset [disabled]="busy() || locked() || !!editing() || !socialsLoaded()">
+      <legend class="visually-hidden">Configuración de WhatsApp</legend>
+      <label class="whatsapp-toggle">
+        <input type="checkbox" role="switch" formControlName="is_visible" />
+        <span>Mostrar botón de WhatsApp</span>
+      </label>
+      <div class="field-grid">
+        <label
+          >País
+          <select formControlName="country" autocomplete="tel-country-code">
+            @for (country of countries; track country.code) {
+              <option [value]="country.code">{{ country.name }}</option>
+            }
+            <option value="other">Otro país</option>
+          </select>
+        </label>
+        @if (whatsappForm.controls.country.value === 'other') {
+          <label
+            >Código de país
+            <input
+              formControlName="code"
+              inputmode="numeric"
+              placeholder="Ej. 506"
+              maxlength="3"
+              aria-describedby="whatsapp-phone-help"
+            />
+          </label>
+        }
+        <label
+          >Número de WhatsApp
+          <input
+            formControlName="phone"
+            type="tel"
+            autocomplete="tel-national"
+            placeholder="Ej. 929 706 525"
+            maxlength="30"
+            aria-describedby="whatsapp-phone-help whatsapp-validation"
+          />
+        </label>
+        <p id="whatsapp-phone-help" class="help wide">Escribe el número sin el código de país.</p>
+        <label class="wide"
+          >Mensaje inicial (opcional)
+          <textarea
+            formControlName="message"
+            rows="3"
+            placeholder="Hola, me interesa conversar sobre un proyecto."
+            aria-describedby="whatsapp-message-help whatsapp-validation"
+          ></textarea>
+        </label>
+        <p id="whatsapp-message-help" class="help wide">
+          Este mensaje aparecerá listo para enviar cuando el visitante abra el chat.
+        </p>
+      </div>
+      @if (whatsappForm.invalid && whatsappForm.touched) {
+        <p id="whatsapp-validation" class="field-error" role="alert">
+          Revisa el código de país y el número (entre 7 y 15 dígitos en total), o acorta el mensaje.
+        </p>
+      }
+      @if (whatsappWarning()) {
+        <p class="help">{{ whatsappWarning() }}</p>
+      }
+      <div class="actions whatsapp-actions">
+        @if (whatsappPreview(); as url) {
+          <a class="button" [href]="url" target="_blank" rel="noopener noreferrer"
+            >Probar WhatsApp <span class="visually-hidden">(abre una pestaña nueva)</span></a
+          >
+        } @else {
+          <button type="button" disabled>Probar WhatsApp</button>
+        }
+      </div>
+    </fieldset>
+    @if (whatsappError()) {
+      <p role="alert" class="error">{{ whatsappError() }}</p>
+    }
+    <p role="status">{{ whatsappNotice() }}</p>
+  </form>
+</section>
+<section aria-labelledby="social-title">
+  <header class="page-heading">
+    <div>
+      <h2 id="social-title">Enlaces sociales</h2>
+      <p>
+        Enlaces que se muestran en el portafolio cuando están visibles. Cada enlace se guarda por
+        separado del perfil.
+      </p>
+    </div>
+    <button type="button" (click)="open('new')" [disabled]="busy() || locked()">
+      Añadir enlace
+    </button>
+  </header>
+  <p role="status">
+    {{ writing() ? 'Guardando enlaces…' : loading() ? 'Cargando enlaces…' : notice() }}
+  </p>
+  @if (error()) {
+    <p role="alert" class="error">{{ error() }}</p>
+    @if (!editing()) {
+      <button type="button" (click)="load()" [disabled]="busy()">Actualizar enlaces</button>
+    }
+  }
+  <ol class="content-list">
+    @for (item of otherLinks(); track item.id; let i = $index) {
+      <li class="content-row">
+        <div class="content-summary">
+          <strong>{{ i + 1 }}. {{ item.platform }}</strong>
+          <p>
+            {{ item.username || 'Sin username' }} · {{ item.is_visible ? 'Visible' : 'Oculto' }}
+          </p>
+          <p>{{ item.url }}</p>
+        </div>
+        <div class="actions">
+          <button type="button" (click)="open(item)" [disabled]="busy() || locked()">
+            Editar enlace</button
+          ><button
+            type="button"
+            (click)="visibility(item)"
+            [disabled]="busy() || locked() || !!editing()"
+          >
+            {{ item.is_visible ? 'Ocultar' : 'Mostrar' }}</button
+          ><button
+            type="button"
+            (click)="moveSocial(item, -1)"
+            [disabled]="i === 0 || busy() || locked() || !!editing()"
+          >
+            Subir enlace</button
+          ><button
+            type="button"
+            (click)="moveSocial(item, 1)"
+            [disabled]="i === otherLinks().length - 1 || busy() || locked() || !!editing()"
+          >
+            Bajar enlace</button
+          ><button
+            type="button"
+            (click)="remove(item)"
+            [disabled]="busy() || locked() || !!editing()"
+          >
+            Eliminar enlace
+          </button>
+        </div>
+      </li>
+    } @empty {
+      @if (!loading() && !error()) {
+        <p>No hay enlaces sociales. Añade el primero.</p>
+      }
+    }
+  </ol>
+  @if (editing()) {
+    <app-project-edit-modal
+      [title]="editing() === 'new' ? 'Nuevo enlace social' : 'Editar enlace social'"
+      description="Guarda el enlace para aplicar sus cambios al perfil público."
+      [blocked]="busy() || locked()"
+      (cancelled)="cancel()"
+    >
+      @if (error()) {
+        <p role="alert" class="error">{{ error() }}</p>
+      }
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <fieldset [disabled]="writing() || locked()">
+          <legend>{{ editing() === 'new' ? 'Nuevo enlace' : 'Editar enlace' }}</legend>
+          <div class="field-grid">
+            <label
+              >Plataforma *<input
+                formControlName="platform"
+                maxlength="50"
+                required
+                aria-describedby="platform-error"
+              />
+              @if (form.controls.platform.invalid && form.controls.platform.touched) {
+                <span id="platform-error" class="field-error"
+                  >Indica una plataforma, máximo 50 caracteres.</span
+                >
+              }
+            </label>
+            <label
+              >URL *<input
+                formControlName="url"
+                type="url"
+                maxlength="2048"
+                required
+                aria-describedby="url-error"
+              />
+              @if (form.controls.url.invalid && form.controls.url.touched) {
+                <span id="url-error" class="field-error"
+                  >Usa una URL HTTP(S) válida sin credenciales; máximo 2048 caracteres.</span
+                >
+              }
+            </label>
+            <label
+              >Username opcional<input
+                formControlName="username"
+                maxlength="100"
+                aria-describedby="username-error"
+              />
+              @if (form.controls.username.invalid && form.controls.username.touched) {
+                <span id="username-error" class="field-error"
+                  >Revisa username, máximo 100 caracteres.</span
+                >
+              }</label
+            ><label class="choice"
+              ><input formControlName="is_visible" type="checkbox" />Visible</label
+            >
+          </div>
+        </fieldset>
+        <div class="actions">
+          <button type="submit" class="primary" [disabled]="busy() || locked()">
+            {{ writing() ? 'Guardando…' : 'Guardar enlace' }}</button
+          ><button type="button" (click)="cancel()" [disabled]="busy() || locked()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </app-project-edit-modal>
+  }
+</section>
+@if (confirmation(); as c) {
+  <app-project-confirm
+    title="Confirmar acción"
+    [message]="c.message"
+    action="Confirmar"
+    (answer)="answer($event)"
+  />
+}

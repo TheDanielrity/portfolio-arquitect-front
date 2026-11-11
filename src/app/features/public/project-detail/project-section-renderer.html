@@ -1,0 +1,82 @@
+<section
+  [class]="'section section-' + section().section_type.toLowerCase()"
+  [attr.aria-label]="section().title || 'Contenido del proyecto'"
+>
+  @if (section().title && section().section_type !== 'SPLIT') {
+    <h2>{{ section().title }}</h2>
+  }
+  @switch (section().section_type) {
+    @case ('TEXT') {
+      <div class="text-layout">
+        <span class="label"
+          >{{ sequence().toString().padStart(2, '0') }} / Descripción del proyecto</span
+        >
+        <p class="prose">{{ section().content }}</p>
+      </div>
+    }
+    @case ('QUOTE') {
+      <blockquote>{{ section().content }}</blockquote>
+    }
+    @case ('SPLIT') {
+      <div class="split">
+        @if (media()[0]; as media) {
+          <app-public-section-media [media]="media" [title]="section().title || ''" />
+        } @else {
+          <p class="missing" role="status">Imagen no disponible.</p>
+        }
+        <div>
+          @if (section().title) {
+            <h2>{{ section().title }}</h2>
+          }
+          <p class="prose">{{ section().content }}</p>
+        </div>
+      </div>
+    }
+    @case ('GALLERY') {
+      <div class="gallery">
+        @for (media of media(); track media.asset.url) {
+          <app-public-section-media [media]="media" [title]="section().title || ''" />
+        }
+      </div>
+      @if (!media().length) {
+        <p class="missing" role="status">Imágenes no disponibles.</p>
+      }
+      @if (section().content) {
+        <p class="prose supporting">{{ section().content }}</p>
+      }
+    }
+    @case ('IMAGE') {
+      @if (media()[0]; as media) {
+        <app-public-section-media [media]="media" [title]="section().title || ''" />
+      } @else {
+        <p class="missing" role="status">Imagen no disponible.</p>
+      }
+      @if (section().content) {
+        <p class="prose supporting">{{ section().content }}</p>
+      }
+    }
+    @case ('VIDEO') {
+      @if (media()[0]; as media) {
+        <app-public-section-media [media]="media" [title]="section().title || ''" />
+      } @else {
+        <p class="missing" role="status">Vídeo no disponible.</p>
+      }
+      @if (section().content) {
+        <p class="prose supporting">{{ section().content }}</p>
+      }
+    }
+    @case ('MODEL_3D') {
+      @if (media()[0]; as media) {
+        <app-public-section-media [media]="media" [title]="section().title || ''" />
+      } @else {
+        <p class="missing" role="status">Modelo no disponible.</p>
+      }
+      @if (section().content) {
+        <p class="prose supporting">{{ section().content }}</p>
+      }
+    }
+    @default {
+      <p class="missing" role="status">Este contenido no está disponible.</p>
+    }
+  }
+</section>

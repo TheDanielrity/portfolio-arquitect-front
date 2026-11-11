@@ -1,0 +1,52 @@
+﻿@mixin label {
+  font-family: var(--public-font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  line-height: 1.5;
+}
+@mixin grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--public-grid-gap);
+}
+@mixin focus {
+  outline: 2px solid var(--public-ring);
+  outline-offset: 5px;
+}
+@mixin reveal {
+  .public-reveal {
+    transition:
+      opacity 1000ms ease,
+      transform 1000ms ease;
+  }
+  .reveal-pending {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .public-reveal {
+      transition: none;
+    }
+    .reveal-pending {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+@mixin image-hover($image) {
+  #{$image} {
+    transition: transform 1200ms ease;
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    &:hover #{$image} {
+      transform: scale(1.015);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #{$image} {
+      transition: none;
+      transform: none;
+    }
+  }
+}

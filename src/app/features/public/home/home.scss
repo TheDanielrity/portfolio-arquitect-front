@@ -1,0 +1,101 @@
+﻿@use '../../../shared/public/public-design' as design;
+:host {
+  display: block;
+}
+.empty-hero {
+  min-height: 620px;
+  height: 92svh;
+  background: var(--public-dark);
+  color: var(--public-dark-foreground);
+  padding: 144px var(--public-gutter) 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.empty-hero p {
+  @include design.label;
+}
+.empty-hero h1 {
+  font: 500 clamp(48px, 8vw, 126px)/0.99 var(--public-font-display);
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  margin: 16px 0 48px;
+  overflow-wrap: anywhere;
+}
+.empty-hero a {
+  color: inherit;
+}
+.selected,
+.index-section {
+  padding: var(--public-section-space) var(--public-gutter);
+  scroll-margin-top: 88px;
+}
+.index-section {
+  padding-top: 32px;
+}
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 24px;
+  margin-bottom: 64px;
+}
+.label,
+a,
+button {
+  @include design.label;
+}
+h2 {
+  font: 500 clamp(30px, 4vw, 60px)/1.1 var(--public-font-display);
+  letter-spacing: -0.03em;
+  margin: 12px 0 0;
+}
+.section-heading h2 span {
+  font: 400 12px var(--public-font-mono);
+  color: var(--public-primary);
+  vertical-align: top;
+}
+.section-heading a {
+  flex: none;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+  padding: 12px 0;
+}
+a:hover {
+  color: var(--public-primary);
+}
+a:focus-visible,
+button:focus-visible {
+  @include design.focus;
+}
+.all-projects {
+  display: inline-block;
+  margin-top: 40px;
+  border-bottom: 1px solid var(--public-border);
+}
+.featured-error {
+  padding: 24px var(--public-gutter);
+  font-size: 14px;
+}
+button {
+  background: none;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  cursor: pointer;
+  color: inherit;
+}
+@media (max-width: 47.999rem) {
+  .section-heading {
+    display: block;
+    margin-bottom: 40px;
+  }
+  .section-heading a {
+    display: inline-block;
+    margin-top: 16px;
+  }
+  .empty-hero h1 {
+    font-size: clamp(44px, 12vw, 70px);
+  }
+}

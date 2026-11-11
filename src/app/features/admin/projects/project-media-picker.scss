@@ -1,0 +1,41 @@
+.close-picker {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  padding: 0;
+  font-size: 28px;
+  line-height: 1;
+}
+.photo-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+.photo-option {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+  overflow: hidden;
+  border: 1.5px solid #000;
+}
+.photo-option:hover:not(:disabled) .photo-label {
+  text-decoration: underline;
+}
+.photo-option:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 4px;
+  box-shadow: 0 0 0 6px #fff;
+}
+.photo-label {
+  display: block;
+  padding: 12px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 37.49rem) {
+  .photo-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

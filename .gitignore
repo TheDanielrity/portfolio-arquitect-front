@@ -1,0 +1,23 @@
+# Local portable Node.js and npm cache
+/.tools/
+
+# Angular build and dependencies
+/node_modules/
+/dist/
+/.angular/
+/coverage/
+
+# Editor and local logs
+/.vscode/
+*.log
+
+# Local environment files and private keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local Python tooling cache
+/.ruff_cache/
+/.netlify/

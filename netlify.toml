@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build:netlify"
+  publish = "dist/architecture-portfolio/browser"
+
+[build.environment]
+  NODE_VERSION = "24.20.0"
+  NPM_VERSION = "11.19.0"
+
+[[plugins]]
+  package = "@netlify/angular-runtime"
+
+# The Angular handler serves SSR, the API gateway and client-rendered admin routes.
+# Do not add a catch-all rewrite to index.html: it would bypass server rendering.

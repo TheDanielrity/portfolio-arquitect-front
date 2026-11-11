@@ -1,0 +1,35 @@
+﻿<dialog
+  #panel
+  id="public-mobile-menu"
+  aria-labelledby="public-menu-title"
+  (cancel)="cancel($event)"
+  (close)="closed()"
+>
+  <div class="menu-top">
+    <span id="public-menu-title">Portafolio / Navegación</span
+    ><button type="button" autofocus (click)="close()" aria-label="Cerrar navegación">
+      Cerrar <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  <nav aria-label="Navegación móvil">
+    <ol>
+      @for (item of items; track item.href; let i = $index) {
+        <li>
+          <a routerLink="/" [fragment]="item.href.split('#')[1]" (click)="close(false)"
+            ><span class="menu-number">0{{ i + 1 }}</span
+            ><span>{{ item.label }}</span>
+            @if (item.label === 'Contacto') {
+              <span class="menu-arrow" aria-hidden="true">↗</span>
+            }
+          </a>
+        </li>
+      }
+    </ol>
+  </nav>
+  <p class="menu-note">
+    {{ content.name() }}
+    @if (content.profile.value()?.location; as location) {
+      <br />{{ location }}
+    }
+  </p>
+</dialog>

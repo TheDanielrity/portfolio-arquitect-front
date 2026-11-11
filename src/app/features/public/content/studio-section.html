@@ -1,0 +1,59 @@
+<section id="studio" aria-labelledby="studio-heading">
+  <header>
+    <span class="label">03 / The studio</span>
+    @if (content.profile.value()?.location; as location) {
+      <span class="label">{{ location }}</span>
+    }
+  </header>
+  @if (content.profile.value(); as profile) {
+    <div class="studio-grid" [class.text-only]="profile.profile_media?.type !== 'IMAGE'">
+      <div class="narrative">
+        <h2 id="studio-heading">{{ content.name() }}<span>.</span></h2>
+        @if (profile.professional_title) {
+          <p class="profession">{{ profile.professional_title }}</p>
+        }
+        @if (profile.short_bio) {
+          <p class="introduction">{{ profile.short_bio }}</p>
+        }
+        @if (profile.biography && profile.biography !== profile.short_bio) {
+          <p class="biography">{{ profile.biography }}</p>
+        }
+        <div class="links">
+          @for (link of content.links(); track link.url) {
+            <a [href]="link.url" target="_blank" rel="noopener noreferrer"
+              >{{ link.platform }} <span aria-hidden="true">↗</span
+              ><span class="sr-only"> (se abre en una pestaña nueva)</span></a
+            >
+          }
+        </div>
+      </div>
+      @if (profile.profile_media?.type === 'IMAGE') {
+        <figure>
+          <div class="portrait">
+            <app-public-cover
+              [media]="profile.profile_media"
+              [title]="content.name()"
+              [thumbnail]="false"
+            />
+          </div>
+          @if (profile.location) {
+            <figcaption class="label">{{ profile.location }}</figcaption>
+          }
+        </figure>
+      }
+    </div>
+  } @else {
+    <h2 id="studio-heading">Studio<span>.</span></h2>
+    @if (content.profile.loading()) {
+      <p role="status">Cargando el estudio…</p>
+    } @else if (!content.profile.error()) {
+      <p class="muted">Aún no se ha publicado la información del estudio.</p>
+    }
+  }
+  @if (content.profile.error()) {
+    <p role="status">
+      La información del estudio no está disponible temporalmente.
+      <button type="button" (click)="content.profile.load()">Reintentar</button>
+    </p>
+  }
+</section>

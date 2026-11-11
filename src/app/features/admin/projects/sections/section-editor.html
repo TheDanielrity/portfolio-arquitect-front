@@ -1,0 +1,252 @@
+<section class="section-editor" aria-labelledby="section-editor-title">
+  <h3 id="section-editor-title">{{ section() ? 'Editar sección' : 'Nueva sección' }}</h3>
+  @if (loading()) {
+    <p role="status">Cargando sección y archivos…</p>
+  }
+  @if (error()) {
+    <p class="error" role="alert" id="section-error">{{ error() }}</p>
+  }
+  @if (!loaded() && !loading()) {
+    <button type="button" (click)="load()">Reintentar carga de sección</button>
+  }
+  @if (!loading()) {
+    <form [formGroup]="form" (ngSubmit)="save()" aria-describedby="section-error">
+      <fieldset [disabled]="busy() || uploadPending() || locked() || !loaded()">
+        <legend>Contenido de la sección</legend>
+        <div class="field-grid">
+          <label
+            >Tipo de contenido<select formControlName="section_type">
+              @if (section(); as existing) {
+                @if (!types.includes(existing.section_type)) {
+                  <option [value]="existing.section_type">
+                    {{ policies[existing.section_type].label }} (tipo existente)
+                  </option>
+                }
+              }
+              @for (t of types; track t) {
+                <option [value]="t">{{ policies[t].label }}</option>
+              }
+            </select></label
+          >
+          <label
+            >Título opcional<input
+              formControlName="title"
+              maxlength="200"
+              aria-describedby="section-title-error"
+              [attr.aria-invalid]="form.controls.title.invalid"
+          /></label>
+          @if (form.controls.title.invalid) {
+            <span id="section-title-error" class="field-error"
+              >Revisa el título (máximo 200 caracteres).</span
+            >
+          }
+          <label class="wide"
+            >{{ form.controls.section_type.value === 'QUOTE' ? 'Cita' : 'Contenido'
+            }}<textarea
+              formControlName="content"
+              rows="8"
+              maxlength="50000"
+              aria-describedby="section-content-error"
+              [attr.aria-invalid]="form.controls.content.invalid"
+            ></textarea>
+          </label>
+          @if (form.controls.content.invalid) {
+            <span id="section-content-error" class="field-error"
+              >Revisa el contenido (máximo 50000 caracteres).</span
+            >
+          }
+        </div>
+        <p class="muted">
+          Texto plano. Las secciones visibles de texto, cita y texto e imagen requieren contenido;
+          las secciones visuales requieren archivos compatibles.
+        </p>
+        <div formArrayName="media">
+          @for (relation of form.controls.media.controls; track relation; let i = $index) {
+            <div class="section-media" [formGroupName]="i">
+              @if (assets()[relation.controls.media_id.value]; as asset) {
+                <app-media-preview
+                  [asset]="asset"
+                  [autoload]="form.controls.section_type.value === 'GALLERY'"
+                  [controls]="form.controls.section_type.value !== 'GALLERY'"
+                /><strong>{{ asset.title || asset.original_filename }}</strong>
+              }
+              <label
+                >Texto de la imagen<input
+                  formControlName="caption"
+                  maxlength="255"
+                  [attr.aria-describedby]="'caption-error-' + i"
+                  [attr.aria-invalid]="relation.controls.caption.invalid"
+              /></label>
+              @if (relation.controls.caption.invalid) {
+                <span class="field-error" role="alert" [id]="'caption-error-' + i"
+                  >Revisa el texto de la imagen (máximo 255 caracteres).</span
+                >
+              }
+              <div class="actions">
+                <button type="button" (click)="move(i, -1)" [disabled]="i === 0">
+                  Subir archivo</button
+                ><button
+                  type="button"
+                  (click)="move(i, 1)"
+                  [disabled]="i === form.controls.media.length - 1"
+                >
+                  Bajar archivo</button
+                ><button type="button" (click)="remove(i)">Quitar archivo</button>
+              </div>
+            </div>
+          }
+        </div>
+        @if (policies[form.controls.section_type.value].media) {
+          @if (form.controls.section_type.value === 'GALLERY') {
+            <div
+              class="upload-dropzone"
+              role="group"
+              aria-label="Subir imágenes a la galería"
+              [class.drag-active]="draggingFiles() && canUploadGallery()"
+              [attr.aria-disabled]="!canUploadGallery()"
+              (dragenter)="galleryDragEnter($event)"
+              (dragleave)="galleryDragLeave($event)"
+              (dragover)="galleryDragOver($event)"
+              (drop)="dropGalleryFile($event)"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.4"
+                aria-hidden="true"
+              >
+                <path d="M12 16V3m-4 4 4-4 4 4M4 15v5h16v-5" />
+              </svg>
+              <strong>Añade imágenes a esta galería</strong>
+              <p>Arrastra una imagen aquí o selecciónala desde tu equipo.</p>
+              <button
+                type="button"
+                class="primary"
+                (click)="sectionFiles.click()"
+                [disabled]="!canUploadGallery()"
+              >
+                Subir imagen
+              </button>
+              <small>JPEG, PNG, WebP y AVIF · hasta 20 MiB · una imagen por subida</small>
+            </div>
+          } @else {
+            <button
+              type="button"
+              (click)="sectionFiles.click()"
+              [disabled]="
+                form.controls.media.length >= policies[form.controls.section_type.value].maximum
+              "
+            >
+              Subir archivo para esta sección
+            </button>
+          }
+          <input
+            #sectionFiles
+            hidden
+            id="section-upload-file"
+            type="file"
+            [accept]="uploadAccept()"
+            (change)="selectFile($event)"
+            [disabled]="
+              form.controls.media.length >= policies[form.controls.section_type.value].maximum
+            "
+          />
+          @if (form.controls.section_type.value !== 'MODEL_3D') {
+            <button
+              type="button"
+              (click)="picker.set(true)"
+              [disabled]="
+                form.controls.media.length >= policies[form.controls.section_type.value].maximum
+              "
+            >
+              {{
+                form.controls.section_type.value === 'GALLERY'
+                  ? 'Elegir fotografías del proyecto'
+                  : 'Elegir de biblioteca'
+              }}
+            </button>
+          }
+        }
+      </fieldset>
+      @if (upload.file() && !(upload.stage() === 'completed' && uploadResultHidden())) {
+        <p role="status" aria-live="polite">
+          {{
+            upload.stage() === 'converting'
+              ? 'Convirtiendo STL a GLB… ' + (upload.conversionProgress() ?? 0) + '%'
+              : upload.busy
+                ? 'Subiendo y procesando archivo…'
+                : upload.stage() === 'completed'
+                  ? 'Archivo listo en la biblioteca. Acepta la sección y guarda el proyecto para incluirlo.'
+                  : 'Subida pendiente de completar.'
+          }}
+        </p>
+        @if (upload.stage() === 'converting') {
+          <progress
+            max="100"
+            [value]="upload.conversionProgress()"
+            aria-label="Progreso de conversión STL a GLB"
+          ></progress>
+        }
+        @if (upload.stage() === 'uploading') {
+          @if (upload.progress() !== null) {
+            <progress
+              max="100"
+              [value]="upload.progress()"
+              aria-label="Progreso de subida"
+            ></progress>
+          } @else {
+            <progress aria-label="Subida en curso"></progress>
+          }
+        }
+        @if (upload.error()) {
+          <p role="alert" class="error">{{ upload.error() }}</p>
+        }
+        @if (upload.retryAfter()) {
+          <p>Espera antes de reintentar: {{ upload.retryAfter() }}</p>
+        }
+        @if (upload.canConfirm) {
+          <button type="button" (click)="upload.confirm()">Reintentar confirmación</button>
+        }
+        @if (upload.stage() === 'failed' || upload.busy) {
+          <button
+            type="button"
+            (click)="upload.cancel()"
+            [disabled]="upload.stage() === 'confirming' || upload.stage() === 'cancelling'"
+          >
+            Cancelar subida
+          </button>
+        }
+        @if (
+          (upload.stage() === 'failed' || upload.stage() === 'cancelled') &&
+          !upload.unresolved &&
+          !upload.busy
+        ) {
+          @if (upload.requiresFileSelection()) {
+            <button type="button" (click)="reselectFile()">Volver a seleccionar archivo</button>
+          } @else {
+            <button type="button" (click)="upload.retry()">Reintentar subida</button>
+          }
+        }
+      }
+      <div class="actions">
+        <button
+          id="section-save"
+          class="primary"
+          type="submit"
+          [disabled]="busy() || uploadPending() || locked() || !loaded()"
+        >
+          {{ busy() ? 'Preparando…' : 'Aceptar' }}</button
+        ><button type="button" (click)="cancelled.emit()" [disabled]="busy()">Cancelar</button>
+      </div>
+    </form>
+  }
+</section>
+@if (picker() && form.controls.section_type.value !== 'MODEL_3D') {
+  <app-project-media-picker
+    [mediaType]="policies[form.controls.section_type.value].media"
+    [projectId]="form.controls.section_type.value === 'GALLERY' ? projectId() : null"
+    (selected)="select($event)"
+    (closed)="picker.set(false)"
+  />
+}

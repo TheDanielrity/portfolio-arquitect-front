@@ -1,0 +1,91 @@
+// Scoped globally so component styles cannot remove the requested button outlines.
+// Public routes do not inherit these rules, including the public WhatsApp button.
+:is(app-admin-layout, app-admin-login) {
+  .page-heading {
+    padding: 1.25rem;
+    background: #fff;
+    border: 1px solid var(--admin-border);
+    border-radius: 6px;
+  }
+
+  :is(button, a.button, [role='button']) {
+    border: 1.5px solid #000 !important;
+    opacity: 1 !important;
+  }
+
+  :is(button, a.button, [role='button']):disabled {
+    background: var(--admin-hover) !important;
+    color: var(--admin-muted) !important;
+    font-style: italic;
+    box-shadow: inset 0 0 0 2px #fff;
+    cursor: not-allowed;
+  }
+
+  :is(button, a.button, [role='button']):hover:not(:disabled):not([aria-disabled='true']) {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  :is(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid #000 !important;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px #fff;
+    scroll-margin-block: 1rem;
+  }
+
+  :is(input, textarea)::placeholder {
+    color: var(--admin-muted) !important;
+    opacity: 1;
+  }
+
+  :is(input, select, textarea):disabled {
+    color: var(--admin-muted);
+    -webkit-text-fill-color: var(--admin-muted);
+    background: var(--admin-hover);
+    opacity: 1;
+  }
+
+  :is(input, select, textarea)[aria-invalid='true'] {
+    border: 3px double var(--admin-danger);
+  }
+
+  :is(.error, .field-error):not(:empty) {
+    display: block;
+    color: var(--admin-danger);
+    background: #fff;
+    border-inline-start: 3px solid currentColor;
+    padding: 0.5rem 0.75rem;
+  }
+
+  :is(button, a)[aria-current],
+  button[aria-pressed='true'] {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    font-weight: 700;
+  }
+
+  :is(p, li, td, th, label, small) {
+    font-weight: 600;
+  }
+
+  app-project-editor .editor-content {
+    :is(.muted, .help, small, figcaption, .section-kind, .visibility-help) {
+      color: var(--admin-muted);
+      font-size: 0.875rem;
+      font-weight: 600;
+      line-height: 1.65;
+    }
+
+    :is(label, legend) {
+      color: var(--admin-text);
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    :is(.section-row, .relation-row) {
+      background: var(--admin-surface);
+      padding: 1.25rem;
+      border: 1px solid var(--admin-border);
+    }
+  }
+}

@@ -1,0 +1,135 @@
+@use '../../../layouts/admin-layout/admin-theme' as theme;
+.page-heading,
+.actions,
+.pagination {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+button,
+.button,
+input,
+select,
+textarea {
+  font: inherit;
+  border: 1px solid var(--admin-border);
+  background: #fff;
+  color: inherit;
+  box-sizing: border-box;
+}
+button,
+.button {
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+button:hover:not(:disabled),
+.button:hover {
+  background: var(--admin-hover);
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+input,
+select,
+textarea {
+  padding: 0.65rem 0.75rem;
+  width: 100%;
+  min-width: 0;
+}
+textarea {
+  resize: vertical;
+}
+input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+}
+label {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+.filters,
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 1.25rem;
+  align-items: end;
+}
+.wide {
+  grid-column: 1/-1;
+}
+fieldset {
+  min-width: 0;
+}
+.error,
+.field-error {
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+.pagination {
+  margin-top: 1.5rem;
+  font-size: 0.8rem;
+}
+.relation-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--admin-border);
+  align-items: center;
+}
+.relation-row .name {
+  flex: 1;
+  min-width: 8rem;
+  overflow-wrap: anywhere;
+}
+.relation-row select {
+  width: auto;
+  max-width: 100%;
+}
+.relation-row app-media-preview {
+  width: 8rem;
+}
+dialog {
+  max-width: min(40rem, calc(100vw - 2rem));
+  width: 100%;
+  max-height: calc(100dvh - 2rem);
+  border: 1px solid var(--admin-border);
+  overflow-y: auto;
+  color: inherit;
+}
+dialog::backdrop {
+  background: rgb(24 32 27 / 40%);
+}
+.choices {
+  display: grid;
+  gap: 0.6rem;
+  max-height: 18rem;
+  overflow-y: auto;
+  margin: 1rem 0;
+}
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+}
+@include theme.controls;
+@media (max-width: 600px) {
+  .page-heading .primary {
+    width: 100%;
+  }
+  .relation-row .name {
+    flex-basis: 100%;
+  }
+  .pagination {
+    gap: 0.5rem;
+  }
+}

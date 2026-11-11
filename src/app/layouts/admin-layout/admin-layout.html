@@ -1,0 +1,74 @@
+<div class="admin-shell">
+  <a class="skip-link" [href]="skipHref()" (click)="focusContent($event)"
+    >Saltar al contenido principal</a
+  >
+  <aside class="desktop-sidebar" aria-label="Panel administrativo">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">a.</span
+      ><span class="brand-name"
+        >Portfolio Admin<span class="brand-caption">ADMINISTRACIÓN</span></span
+      >
+    </div>
+    <app-admin-navigation />
+  </aside>
+
+  <div class="workspace">
+    <header class="topbar">
+      <button
+        class="menu-button"
+        type="button"
+        (click)="drawer.open()"
+        aria-label="Abrir navegación"
+        aria-controls="admin-mobile-navigation"
+        [attr.aria-expanded]="drawer.opened()"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M4 6h16 M4 12h16 M4 18h16" />
+        </svg>
+      </button>
+      <div class="context">
+        <span class="context-label">Administración</span><span>{{ pageLabel() }}</span>
+      </div>
+      @if (user(); as currentUser) {
+        <div class="user-details">
+          <span class="user-name" [title]="userName()">{{ userName() }}</span
+          ><span class="user-email" [title]="currentUser.email">{{ currentUser.email }}</span>
+        </div>
+      }
+      <button
+        class="logout-button"
+        type="button"
+        (click)="logout()"
+        [disabled]="loggingOut()"
+        [attr.aria-busy]="loggingOut()"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M9 4H4v16h5 M13 8l4 4-4 4 M8 12h13" />
+        </svg>
+        <span>{{ loggingOut() ? 'Cerrando…' : 'Cerrar sesión' }}</span>
+      </button>
+      <span class="sr-only" role="status">{{ loggingOut() ? 'Cerrando sesión.' : '' }}</span>
+    </header>
+    <main #content id="admin-main" tabindex="-1" aria-label="Contenido administrativo">
+      <router-outlet />
+      <footer class="admin-footer">
+        <span>Portfolio Admin</span><span>Espacio de trabajo privado</span>
+      </footer>
+    </main>
+  </div>
+  <app-admin-drawer #drawer (desktop)="focusContent()" />
+</div>

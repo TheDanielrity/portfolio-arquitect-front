@@ -1,0 +1,40 @@
+:host {
+  display: block;
+}
+.content,
+blockquote {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+blockquote {
+  margin: 1rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--admin-accent);
+}
+figure {
+  margin: 0;
+  min-width: 0;
+}
+figcaption {
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+.media {
+  display: grid;
+  gap: 1rem;
+}
+.gallery {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+@media (max-width: 600px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+}

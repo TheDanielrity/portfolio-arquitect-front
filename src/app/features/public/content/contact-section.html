@@ -1,0 +1,33 @@
+<section id="contact" aria-labelledby="contact-heading">
+  <h2 id="contact-heading" class="label">Contacto</h2>
+  <div class="contact-details">
+    <div>
+      <p class="name">{{ content.name() }}</p>
+      @if (content.profile.value(); as profile) {
+        @if (content.emailHref(); as href) {
+          <a [href]="href">{{ profile.email }}</a>
+        }
+        @if (content.phoneHref(); as href) {
+          <a [href]="href">{{ profile.phone }}</a>
+        }
+      }
+    </div>
+    <div class="socials">
+      @for (link of content.links(); track link.url) {
+        <a [href]="link.url" target="_blank" rel="noopener noreferrer"
+          >{{ link.platform }} <span aria-hidden="true">↗</span
+          ><span class="sr-only"> (se abre en una pestaña nueva)</span></a
+        >
+      }
+      @if (content.socials.error()) {
+        <p role="status">
+          Las redes sociales no están disponibles temporalmente.
+          <button type="button" (click)="content.socials.load()">Reintentar</button>
+        </p>
+      }
+    </div>
+    @if (content.profile.value()?.location; as location) {
+      <p class="location label">{{ location }}</p>
+    }
+  </div>
+</section>

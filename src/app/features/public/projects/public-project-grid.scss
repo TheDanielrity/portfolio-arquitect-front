@@ -1,0 +1,51 @@
+﻿@use '../../../shared/public/public-design' as design;
+@include design.reveal;
+.editorial-grid {
+  @include design.grid;
+  row-gap: 80px;
+  align-items: start;
+}
+.wide {
+  grid-column: 1 / span 8;
+}
+.compact {
+  grid-column: 1 / span 5;
+  margin-top: 16px;
+}
+.shifted {
+  grid-column: 7 / span 6;
+  margin-top: 128px;
+}
+.offset {
+  grid-column: 3 / span 9;
+  margin-top: 32px;
+}
+@media (max-width: 63.999rem) {
+  .editorial-grid {
+    row-gap: 64px;
+  }
+  .wide {
+    grid-column: 1 / span 10;
+  }
+  .compact {
+    grid-column: 1 / span 5;
+  }
+  .shifted {
+    grid-column: 7 / span 6;
+    margin-top: 64px;
+  }
+  .offset {
+    grid-column: 2 / span 10;
+  }
+}
+@media (max-width: 47.999rem) {
+  .editorial-grid {
+    display: block;
+  }
+  app-project-preview {
+    margin: 0 0 56px;
+  }
+  app-project-preview:last-child {
+    margin-bottom: 0;
+  }
+}

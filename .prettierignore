@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.angular/
+.tools/
+coverage/
+package-lock.json
+public/assets/meshopt/
+AGENTS.md
+PLANS.md
+docs/

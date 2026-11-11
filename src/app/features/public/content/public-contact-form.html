@@ -1,0 +1,74 @@
+<section id="contact-form" aria-labelledby="contact-form-heading">
+  <p class="label">Your enquiry</p>
+  <h3 id="contact-form-heading">Tell us about your project.</h3>
+  @if (received()) {
+    <div class="receipt" role="status" aria-live="polite">
+      <p>Message received. Thank you for getting in touch.</p>
+      <button type="button" (click)="reset()">
+        Write another message <span aria-hidden="true">↗</span>
+      </button>
+    </div>
+  } @else if (content.contactEnabled()) {
+    <form [formGroup]="form" (ngSubmit)="submit()" [attr.aria-busy]="sending()">
+      <fieldset [disabled]="sending()">
+        <legend class="sr-only">Contact details and message</legend>
+        <div class="fields">
+          @for (field of fields; track field.key) {
+            <div class="field">
+              <label [for]="'contact-' + field.key"
+                >{{ field.label }}{{ field.required ? ' *' : ' (optional)' }}</label
+              >
+              <input
+                [id]="'contact-' + field.key"
+                [type]="field.type"
+                [formControlName]="field.key"
+                [autocomplete]="field.autocomplete"
+                [maxlength]="field.max"
+                [required]="field.required"
+                [attr.aria-invalid]="invalid(field.key)"
+                [attr.aria-describedby]="
+                  invalid(field.key) ? 'contact-' + field.key + '-error' : null
+                "
+              />
+              @if (invalid(field.key)) {
+                <p class="field-error" [id]="'contact-' + field.key + '-error'">{{ field.help }}</p>
+              }
+            </div>
+          }
+          <div class="field message">
+            <label for="contact-message">Message *</label>
+            <textarea
+              id="contact-message"
+              formControlName="message"
+              rows="5"
+              maxlength="10000"
+              required
+              [attr.aria-invalid]="invalid('message')"
+              [attr.aria-describedby]="invalid('message') ? 'contact-message-error' : null"
+            ></textarea>
+            @if (invalid('message')) {
+              <p class="field-error" id="contact-message-error">
+                Enter your message (up to 10,000 characters).
+              </p>
+            }
+          </div>
+        </div>
+      </fieldset>
+      @if (error()) {
+        <p class="error" role="alert">{{ error() }}</p>
+      }
+      @if (wait()) {
+        <p role="status">Reintentar in {{ wait() }} seconds.</p>
+      }
+      <div class="submit-row">
+        <span class="label">* Required fields</span>
+        <button type="submit" [disabled]="sending() || wait() > 0">
+          {{ sending() ? 'Sending…' : 'Send message' }} <span aria-hidden="true">↗</span>
+        </button>
+      </div>
+      @if (sending()) {
+        <p role="status" aria-live="polite">Sending your message…</p>
+      }
+    </form>
+  }
+</section>

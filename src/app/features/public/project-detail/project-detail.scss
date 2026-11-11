@@ -1,0 +1,131 @@
+:host {
+  display: block;
+}
+.overview {
+  scroll-margin-top: calc(var(--public-header-height) + 24px);
+  padding: 112px var(--public-gutter) 0;
+}
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 32px;
+  margin: 0;
+}
+.facts div {
+  border-top: 1px solid var(--public-border);
+  padding-top: 16px;
+  min-width: 0;
+}
+.label,
+dt {
+  font: 400 10px/1.6 var(--public-font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+}
+dt {
+  color: var(--public-muted-foreground);
+}
+dd {
+  margin: 12px 0 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.introduction {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  padding: 96px 0 0;
+}
+.introduction > .label {
+  color: var(--public-primary);
+}
+h2 {
+  font: 500 clamp(32px, 4vw, 64px)/1.1 var(--public-font-display);
+  letter-spacing: -0.035em;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.introduction p {
+  max-width: 65ch;
+  white-space: pre-wrap;
+  line-height: 1.9;
+  color: var(--public-muted-foreground);
+  margin: 28px 0 0;
+  overflow-wrap: anywhere;
+}
+.next-project {
+  display: block;
+  position: relative;
+  height: max(480px, 75svh);
+  margin-top: 112px;
+  background: var(--public-dark);
+  color: white;
+  overflow: hidden;
+}
+.next-project app-public-cover {
+  position: absolute;
+  inset: 0;
+  transition: transform 1s;
+}
+.next-project:after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 45%);
+}
+.next-copy {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 24px;
+  padding: 56px var(--public-gutter);
+}
+.next-copy h2 {
+  font-size: clamp(48px, 9vw, 140px);
+  text-transform: uppercase;
+}
+.next-project:hover app-public-cover {
+  transform: scale(1.025);
+}
+.status {
+  background: var(--public-dark);
+  color: var(--public-dark-foreground);
+  min-height: 65svh;
+  padding: 180px var(--public-gutter) 80px;
+}
+.status h1 {
+  font: 500 clamp(36px, 6vw, 80px)/1.1 var(--public-font-display);
+}
+.status a,
+.status button {
+  display: inline-block;
+  margin: 24px 24px 0 0;
+}
+@media (max-width: 47.99rem) {
+  .overview {
+    padding-top: 64px;
+  }
+  .introduction {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding-top: 64px;
+  }
+  .facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .next-project {
+    margin-top: 64px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .next-project app-public-cover {
+    transition: none;
+  }
+  .next-project:hover app-public-cover {
+    transform: none;
+  }
+}

@@ -1,0 +1,55 @@
+﻿<section
+  class="spotlight"
+  [class.hero]="hero()"
+  [attr.aria-label]="hero() ? 'Presentación del proyecto' : 'Proyecto destacado'"
+>
+  @if (project().cover?.type === 'IMAGE') {
+    <app-public-cover
+      class="backdrop"
+      [media]="project().cover"
+      [title]="project().title"
+      [thumbnail]="false"
+      [priority]="hero()"
+      fit="fill"
+    />
+  }
+  <div class="content">
+    <div class="top">
+      <span>{{
+        detail()
+          ? 'Proyecto / Caso de estudio'
+          : hero()
+            ? 'Portafolio / Selección de proyectos'
+            : 'Proyecto destacado'
+      }}</span
+      ><span>{{ project().categories[0]?.name }}</span>
+    </div>
+    <div>
+      @if (hero()) {
+        <h1 id="public-hero-heading">{{ project().title }} <span aria-hidden="true">↗</span></h1>
+      } @else {
+        <h2>{{ project().title }}</h2>
+      }
+      <div class="narrative">
+        @if (project().short_description) {
+          <p>{{ project().short_description }}</p>
+        }
+        @if (!detail()) {
+          <a [routerLink]="['/projects', project().slug]"
+            >{{ hero() ? 'Ver proyecto' : 'Explorar proyecto' }}
+            <span aria-hidden="true">↗</span></a
+          >
+        }
+      </div>
+    </div>
+    <div class="bottom">
+      <span>{{ project().location }}</span
+      ><span>{{ project().year }}</span>
+      @if (hero()) {
+        <a href="#projects">Desplázate para explorar <span aria-hidden="true">↓</span></a>
+      } @else {
+        <span>{{ project().categories[0]?.name }}</span>
+      }
+    </div>
+  </div>
+</section>
