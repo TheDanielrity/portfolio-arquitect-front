@@ -12,6 +12,20 @@ Repositorios:
 - Frontend: https://github.com/TheDanielrity/portfolio-arquitect-front
 - Backend: https://github.com/TheDanielrity/portfolio-arquitect-back
 
+Ambos repositorios recibieron su primer commit en `main`. El frontend se publicó
+desde este directorio. El backend se publicó desde una copia aislada en `.tools`,
+con 141 archivos de código/documentación idénticos a los originales y un
+`.env.example` saneado por separado. No se copiaron `.env`, bases, archivos de
+medios, entornos virtuales ni credenciales. La carpeta backend original sigue
+intacta. No se han ejecutado pruebas del backend como parte de esta publicación
+sin cambios de código.
+
+Validación frontend: 651 pruebas Angular y 15 pruebas del proxy pasan; también
+lint, formato, TypeScript, build Netlify, hooks del adaptador y render SSR local.
+El build Node y su prueba de gateway también pasan. No se han añadido rutas de
+pantallas ni endpoints del backend: se conserva el prefijo existente `/api/v1`.
+Única dependencia añadida: `@netlify/angular-runtime` 4.0.0, de desarrollo.
+
 El backend se inspeccionó en modo lectura: requiere Python >=3.12,
 PostgreSQL con Psycopg y variables validadas en `app/core/config.py`.
 Su publicación y configuración se realizan por separado; este cambio no modifica

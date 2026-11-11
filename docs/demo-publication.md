@@ -10,7 +10,8 @@
   no confirma que el servicio esté caído.
 - La carpeta local no tenía repositorio Git ni un remoto configurado al comenzar
   esta preparación.
-- No se ha publicado código nuevo ni se ha cambiado el hosting.
+- El código del frontend y una copia limpia del backend ya se publicaron en
+  los repositorios indicados en `netlify-render.md`. El hosting todavía no cambió.
 
 ## Código como evidencia
 
@@ -46,6 +47,7 @@ una demo.
 
 ## Datos pendientes
 
-- URL del repositorio GitHub que recibirá este frontend.
-- Elección entre conservar Railway o migrar a Netlify + Render.
-- Verificación del servicio y del contenido público antes de compartir la demo.
+- Conectar las cuentas de Netlify y Render para crear/configurar los servicios.
+- Configurar PostgreSQL y definir la transferencia de datos existentes.
+- Configurar los orígenes autorizados y las variables R2 en los servicios.
+- Verificar el servicio y el contenido público antes de compartir la demo.
