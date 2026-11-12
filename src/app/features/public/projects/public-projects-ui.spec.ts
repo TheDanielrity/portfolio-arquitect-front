@@ -268,6 +268,25 @@ describe('Public index filters, pagination and pointer preview', () => {
     (f.nativeElement.querySelector('.pagination button') as HTMLButtonElement).click();
     expect(changed).not.toHaveBeenCalled();
   });
+  it('keeps the index stable and blocks category changes until loading finishes', () => {
+    const { f, c, changed } = setup();
+    c.loading.set(true);
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('.index-rows')).not.toBeNull();
+    expect(f.nativeElement.querySelector('[role="status"]')).toBeNull();
+    expect(f.nativeElement.querySelector('section').getAttribute('aria-busy')).toBe('true');
+    const buttons = f.nativeElement.querySelectorAll('.filters button');
+    for (const button of buttons) {
+      expect(button.disabled).toBe(true);
+      button.click();
+    }
+    f.componentInstance.filter('architecture');
+    expect(changed).not.toHaveBeenCalled();
+    c.loading.set(false);
+    f.detectChanges();
+    buttons[1].click();
+    expect(changed).toHaveBeenCalledOnce();
+  });
   it('distinguishes an out-of-range page from an empty collection and can reset offset', () => {
     const { f, changed } = setup(page([], { total: 4, limit: 12, offset: 24 }));
     expect(f.nativeElement.textContent).toContain('No hay proyectos en esta página.');

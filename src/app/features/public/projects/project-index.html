@@ -39,10 +39,8 @@
   @if (collection.categoryLoading()) {
     <p class="notice" role="status">Cargando categorías…</p>
   }
-  @if (collection.loading()) {
-    <p class="notice" role="status">
-      {{ collection.page() ? 'Actualizando proyectos…' : 'Cargando proyectos…' }}
-    </p>
+  @if (collection.loading() && !collection.page()) {
+    <p class="notice" role="status">Cargando proyectos…</p>
   }
   @if (collection.error()) {
     <div class="notice" role="alert">
