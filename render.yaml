@@ -10,7 +10,7 @@ services:
     autoDeployTrigger: off
     buildCommand: python -m pip install .
     # Free services have no pre-deploy phase. Fail before opening the HTTP port.
-    # Adapt Render's PostgreSQL scheme without changing backend configuration code.
+    # Adapt Neon's PostgreSQL scheme without changing backend configuration code.
     startCommand: >-
       export DATABASE_URL="postgresql+psycopg://${DATABASE_URL#*://}" &&
       export MEDIA_BASE_URL="$RENDER_EXTERNAL_URL" &&
@@ -27,9 +27,7 @@ services:
       - key: CORS_ORIGINS
         value: '["https://portfolio-arquitect.netlify.app"]'
       - key: DATABASE_URL
-        fromDatabase:
-          name: portfolio-arquitect-db
-          property: connectionString
+        sync: false
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: STORAGE_PROVIDER
@@ -42,9 +40,3 @@ services:
         sync: false
       - key: R2_BUCKET_NAME
         sync: false
-databases:
-  - name: portfolio-arquitect-db
-    region: virginia
-    plan: free
-    postgresMajorVersion: '17'
-    ipAllowList: []
