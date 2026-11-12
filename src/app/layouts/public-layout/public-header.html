@@ -1,5 +1,11 @@
 <header [class.solid]="solid()">
-  <a #brand routerLink="/" class="public-brand" [attr.aria-label]="content.name() + ' — Inicio'">
+  <a
+    #brand
+    routerLink="/"
+    class="public-brand"
+    [class.white-logo]="whiteLogo()"
+    [attr.aria-label]="content.name() + ' — Inicio'"
+  >
     @if (logoUrl(); as url) {
       @if (failedLogo() !== url) {
         <img

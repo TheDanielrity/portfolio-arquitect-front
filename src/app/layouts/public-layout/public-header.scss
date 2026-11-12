@@ -29,6 +29,7 @@ a {
   color: inherit;
 }
 .public-brand {
+  color: #000;
   display: flex;
   align-items: center;
   flex: 0 0 64px;
@@ -44,6 +45,13 @@ a {
 }
 .brand-logo {
   object-fit: contain;
+  filter: brightness(0);
+}
+.public-brand.white-logo {
+  color: #fff;
+}
+.white-logo .brand-logo {
+  filter: brightness(0) invert(1);
 }
 .brand-symbol {
   display: grid;

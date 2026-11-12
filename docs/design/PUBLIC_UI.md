@@ -17,6 +17,12 @@ independent. Do not guess that every phone number supports WhatsApp.
 
 ## Visual reference files
 
+The public header logo uses a monochrome treatment. Over a hero, sample the
+displayed cover region behind the logo, including its dark overlay, and choose
+white or black by contrast. Recalculate after image changes and viewport resize.
+Use white when image sampling is unavailable. A solid header or open menu uses
+black. Sampling runs only in the browser and must not block image rendering.
+
 The following files are visual references for the public portfolio:
 
 - `docs/design/references/home-desktop.png`

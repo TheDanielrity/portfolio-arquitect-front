@@ -17,6 +17,7 @@ import { PublicMobileMenu } from './public-mobile-menu';
 import { PUBLIC_NAVIGATION } from './public-navigation';
 import { PublicContentState, publicUrl } from '../../features/public/content/public-content-state';
 import { PublicMediaDelivery } from '../../features/public/project-detail/public-media-delivery';
+import { observeHeroLogoContrast } from './hero-logo-contrast';
 @Component({
   selector: 'app-public-header',
   imports: [RouterLink, PublicMobileMenu],
@@ -49,6 +50,8 @@ export class PublicHeader {
   readonly scrolled = signal(false);
   readonly opened = computed(() => this.menu()?.opened() ?? false);
   readonly solid = computed(() => !this.overHero() || this.scrolled() || this.opened());
+  readonly darkHero = signal(true);
+  readonly whiteLogo = computed(() => !this.solid() && this.darkHero());
   readonly items = PUBLIC_NAVIGATION;
   constructor() {
     inject(Router)
@@ -60,6 +63,12 @@ export class PublicHeader {
     afterNextRender(() => {
       const view = this.document.defaultView;
       if (!view) return;
+      const brand = this.brand()?.nativeElement;
+      if (brand) {
+        this.destroy.onDestroy(
+          observeHeroLogoContrast(this.document, brand, (white) => this.darkHero.set(white)),
+        );
+      }
       const update = () => this.scrolled.set(view.scrollY > 50);
       update();
       view.addEventListener('scroll', update, { passive: true });

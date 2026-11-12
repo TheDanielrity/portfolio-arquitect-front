@@ -60,6 +60,21 @@ describe('Public header profile logo', () => {
     expect(fixture.nativeElement.querySelector('.brand-logo')).toBeNull();
     expect(fixture.nativeElement.querySelector('.brand-symbol').textContent).toBe('TA');
   });
+  it('adapts the logo over a hero and returns to black when the header becomes solid', () => {
+    const fixture = TestBed.createComponent(PublicHeader);
+    fixture.componentRef.setInput('overHero', true);
+    fixture.componentInstance.darkHero.set(true);
+    fixture.detectChanges();
+    const brand = fixture.nativeElement.querySelector('.public-brand');
+    expect(brand.classList.contains('white-logo')).toBe(true);
+    fixture.componentInstance.darkHero.set(false);
+    fixture.detectChanges();
+    expect(brand.classList.contains('white-logo')).toBe(false);
+    fixture.componentInstance.darkHero.set(true);
+    fixture.componentInstance.scrolled.set(true);
+    fixture.detectChanges();
+    expect(brand.classList.contains('white-logo')).toBe(false);
+  });
   it('falls back after an image error and shows a replacement logo when the source changes', () => {
     const fixture = TestBed.createComponent(PublicHeader);
     fixture.detectChanges();
