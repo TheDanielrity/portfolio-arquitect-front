@@ -1,6 +1,6 @@
 import { inject, Injectable, signal, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Subject, switchMap, catchError, EMPTY } from 'rxjs';
+import { Subject, switchMap, catchError, EMPTY, of, tap } from 'rxjs';
 import { ApiError } from '../../../core/api/api-error';
 import type { PagePublicProjectCard, PublicCategory } from '../../../core/api/generated/types.gen';
 import { PublicProjectsApi, PublicProjectQuery } from './public-projects-api';
@@ -17,7 +17,9 @@ export function publicProjectError(error: unknown): string {
 @Injectable()
 export class PublicProjectCollection {
   private readonly api = inject(PublicProjectsApi);
-  private readonly requests = new Subject<PublicProjectQuery>();
+  private readonly requests = new Subject<{ query: PublicProjectQuery; refresh: boolean }>();
+  // Scoped to this page instance: no cross-user, persistent, or server-wide cache.
+  private readonly pages = new Map<string, { page: PagePublicProjectCard; expires: number }>();
   private readonly categoryRequests = new Subject<void>();
   readonly initialPage = signal<PagePublicProjectCard | null>(null);
   readonly page = signal<PagePublicProjectCard | null>(null);
@@ -31,15 +33,28 @@ export class PublicProjectCollection {
     const destroy = inject(DestroyRef);
     this.requests
       .pipe(
-        switchMap((q) =>
-          this.api.list(q).pipe(
+        switchMap(({ query, refresh }) => {
+          const key = JSON.stringify([
+            query.limit ?? 20,
+            query.offset ?? 0,
+            query.category || null,
+            query.tag || null,
+          ]);
+          const cached = this.pages.get(key);
+          if (!refresh && cached && cached.expires > Date.now()) return of(cached.page);
+          this.pages.delete(key);
+          return this.api.list(query).pipe(
+            tap((page) => {
+              this.pages.set(key, { page, expires: Date.now() + 60_000 });
+              if (this.pages.size > 12) this.pages.delete(this.pages.keys().next().value!);
+            }),
             catchError((e: unknown) => {
               this.error.set(e);
               this.loading.set(false);
               return EMPTY;
             }),
-          ),
-        ),
+          );
+        }),
         takeUntilDestroyed(destroy),
       )
       .subscribe((p) => {
@@ -72,13 +87,13 @@ export class PublicProjectCollection {
     this.categoryLoading.set(true);
     this.categoryRequests.next();
   }
-  load(query: PublicProjectQuery): void {
+  load(query: PublicProjectQuery, refresh = false): void {
     this.query.set(query);
     this.loading.set(true);
     this.error.set(null);
-    this.requests.next(query);
+    this.requests.next({ query, refresh });
   }
   retry(): void {
-    this.load(this.query());
+    this.load(this.query(), true);
   }
 }

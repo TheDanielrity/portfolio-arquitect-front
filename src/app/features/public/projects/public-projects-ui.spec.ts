@@ -186,6 +186,59 @@ describe('Public portfolio Home', () => {
   });
 });
 describe('Public collection loading and concurrency', () => {
+  it('reuses recently visited filters and pages without another API request', () => {
+    const api = apiMock();
+    TestBed.configureTestingModule({
+      providers: [PublicProjectCollection, { provide: PublicProjectsApi, useValue: api }],
+    });
+    const c = TestBed.inject(PublicProjectCollection);
+    c.load({ limit: 12 });
+    c.load({ limit: 12, category: 'architecture' });
+    c.load({ limit: 12, offset: 12 });
+    expect(api.list).toHaveBeenCalledTimes(3);
+    c.load({ offset: 0, category: null, limit: 12 });
+    expect(api.list).toHaveBeenCalledTimes(3);
+    expect(c.loading()).toBe(false);
+    c.load({ limit: 12, category: 'architecture' });
+    expect(api.list).toHaveBeenCalledTimes(3);
+    c.load({ limit: 12, tag: 'new-tag' });
+    expect(api.list).toHaveBeenCalledTimes(4);
+  });
+  it('expires cached results after one minute and lets retry fetch fresh data', () => {
+    const now = vi.spyOn(Date, 'now');
+    try {
+      now.mockReturnValue(1000);
+      const api = apiMock();
+      TestBed.configureTestingModule({
+        providers: [PublicProjectCollection, { provide: PublicProjectsApi, useValue: api }],
+      });
+      const c = TestBed.inject(PublicProjectCollection);
+      c.load({ limit: 12 });
+      now.mockReturnValue(62_000);
+      c.load({ limit: 12 });
+      expect(api.list).toHaveBeenCalledTimes(2);
+      c.retry();
+      expect(api.list).toHaveBeenCalledTimes(3);
+    } finally {
+      now.mockRestore();
+    }
+  });
+  it('cancels an unfinished request when switching back to a cached category', () => {
+    const pending = new Subject<PagePublicProjectCard>();
+    const api = apiMock();
+    api.list.mockReturnValueOnce(of(page())).mockReturnValueOnce(pending);
+    TestBed.configureTestingModule({
+      providers: [PublicProjectCollection, { provide: PublicProjectsApi, useValue: api }],
+    });
+    const c = TestBed.inject(PublicProjectCollection);
+    c.load({ limit: 12 });
+    c.load({ limit: 12, category: 'architecture' });
+    c.load({ limit: 12 });
+    pending.next(page([{ ...card, slug: 'stale-result' }]));
+    expect(c.page()?.items[0].slug).toBe(card.slug);
+    expect(c.loading()).toBe(false);
+    expect(api.list).toHaveBeenCalledTimes(2);
+  });
   it('starts loading, keeps previous entries during refresh, and cancels obsolete requests', () => {
     const a = new Subject<PagePublicProjectCard>(),
       b = new Subject<PagePublicProjectCard>();
@@ -246,6 +299,11 @@ describe('Public index filters, pagination and pointer preview', () => {
       category: 'architecture',
       tag: null,
     });
+  });
+  it('does not request the already selected category again', () => {
+    const { f, changed } = setup();
+    (f.nativeElement.querySelector('.filters button') as HTMLButtonElement).click();
+    expect(changed).not.toHaveBeenCalled();
   });
   it('does not expose technical tag-slug controls to visitors', () => {
     const { f } = setup();
@@ -390,6 +448,7 @@ describe('Public project route state', () => {
       limit: 6,
     });
     const component = h.routeDebugElement!.componentInstance as PublicProjectsPage;
+    const initialPage = component.collection.page();
     component.navigate({ ...component.collection.query(), limit: 6, offset: 0, tag: 'built' });
     await h.fixture.whenStable();
     expect(TestBed.inject(Router).url).toContain('tag=built');
@@ -400,12 +459,14 @@ describe('Public project route state', () => {
       limit: 6,
     });
     await h.navigateByUrl('/projects?category=architecture&offset=12&limit=6');
-    expect(api.list).toHaveBeenLastCalledWith({
+    expect(component.collection.query()).toEqual({
       category: 'architecture',
       tag: undefined,
       offset: 12,
       limit: 6,
     });
+    expect(component.collection.page()).toBe(initialPage);
+    expect(api.list).toHaveBeenCalledTimes(2);
   });
   it('slug destination loads the public detail without administrative components', async () => {
     const api = {

@@ -64,7 +64,8 @@ export class ProjectIndex {
     });
   }
   filter(category: string | null): void {
-    if (this.collection.loading()) return;
+    if (this.collection.loading() || (this.collection.query().category ?? null) === category)
+      return;
     this.hidePreview();
     this.changed.emit({ ...this.collection.query(), category, offset: 0 });
   }
