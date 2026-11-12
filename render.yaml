@@ -1,0 +1,50 @@
+# Demo infrastructure; application source stays in the independent backend repo.
+services:
+  - type: web
+    name: portfolio-arquitect-api
+    runtime: python
+    repo: https://github.com/TheDanielrity/portfolio-arquitect-back
+    branch: main
+    region: virginia
+    plan: free
+    autoDeployTrigger: off
+    buildCommand: python -m pip install .
+    # Free services have no pre-deploy phase. Fail before opening the HTTP port.
+    # Adapt Render's PostgreSQL scheme without changing backend configuration code.
+    startCommand: >-
+      export DATABASE_URL="postgresql+psycopg://${DATABASE_URL#*://}" &&
+      export MEDIA_BASE_URL="$RENDER_EXTERNAL_URL" &&
+      python -m alembic upgrade head &&
+      exec python -m uvicorn app.main:app --host 0.0.0.0 --port "$PORT"
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.12
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: 'false'
+      - key: CORS_ORIGINS
+        value: '["https://portfolio-arquitect.netlify.app"]'
+      - key: DATABASE_URL
+        fromDatabase:
+          name: portfolio-arquitect-db
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: STORAGE_PROVIDER
+        value: r2
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+databases:
+  - name: portfolio-arquitect-db
+    region: virginia
+    plan: free
+    postgresMajorVersion: '17'
+    ipAllowList: []
