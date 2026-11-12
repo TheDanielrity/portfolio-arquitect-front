@@ -18,6 +18,7 @@ import { PUBLIC_NAVIGATION } from './public-navigation';
 import { PublicContentState, publicUrl } from '../../features/public/content/public-content-state';
 import { PublicMediaDelivery } from '../../features/public/project-detail/public-media-delivery';
 import { observeHeroLogoContrast } from './hero-logo-contrast';
+import { analyzeLogoImage } from './logo-analysis';
 @Component({
   selector: 'app-public-header',
   imports: [RouterLink, PublicMobileMenu],
@@ -51,7 +52,14 @@ export class PublicHeader {
   readonly opened = computed(() => this.menu()?.opened() ?? false);
   readonly solid = computed(() => !this.overHero() || this.scrolled() || this.opened());
   readonly darkHero = signal(true);
-  readonly whiteLogo = computed(() => !this.solid() && this.darkHero());
+  readonly logoAnalysis = signal<{ url: string; adaptive: boolean } | null>(null);
+  readonly adaptiveLogo = computed(() => {
+    const url = this.logoUrl();
+    if (!url || this.failedLogo() === url) return true;
+    const result = this.logoAnalysis();
+    return result?.url === url && result.adaptive;
+  });
+  readonly whiteLogo = computed(() => this.adaptiveLogo() && !this.solid() && this.darkHero());
   readonly items = PUBLIC_NAVIGATION;
   constructor() {
     inject(Router)
@@ -77,6 +85,14 @@ export class PublicHeader {
   }
   openMenu(): void {
     this.menu()?.open();
+  }
+  async analyzeLogo(): Promise<void> {
+    const url = this.logoUrl();
+    if (!url) return;
+    const adaptive = await analyzeLogoImage(this.document, url);
+    if (!this.destroy.destroyed && this.logoUrl() === url) {
+      this.logoAnalysis.set({ url, adaptive });
+    }
   }
   focusBrand(): void {
     this.brand()?.nativeElement.focus();

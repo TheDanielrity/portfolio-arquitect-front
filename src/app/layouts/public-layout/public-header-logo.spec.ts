@@ -63,6 +63,7 @@ describe('Public header profile logo', () => {
   it('adapts the logo over a hero and returns to black when the header becomes solid', () => {
     const fixture = TestBed.createComponent(PublicHeader);
     fixture.componentRef.setInput('overHero', true);
+    fixture.componentInstance.logoAnalysis.set({ url: card.cover!.url, adaptive: true });
     fixture.componentInstance.darkHero.set(true);
     fixture.detectChanges();
     const brand = fixture.nativeElement.querySelector('.public-brand');
@@ -89,5 +90,25 @@ describe('Public header profile logo', () => {
     expect(fixture.nativeElement.querySelector('.brand-logo').src).toBe(
       'https://example.test/new-logo.png',
     );
+  });
+  it('preserves opaque logos over dark heroes and while a replacement is being analyzed', () => {
+    const fixture = TestBed.createComponent(PublicHeader);
+    fixture.componentRef.setInput('overHero', true);
+    fixture.componentInstance.darkHero.set(true);
+    fixture.componentInstance.logoAnalysis.set({ url: card.cover!.url, adaptive: false });
+    fixture.detectChanges();
+    const brand = fixture.nativeElement.querySelector('.public-brand');
+    expect(brand.classList.contains('adaptive-logo')).toBe(false);
+    expect(brand.classList.contains('white-logo')).toBe(false);
+    fixture.componentInstance.logoAnalysis.set({ url: card.cover!.url, adaptive: true });
+    fixture.detectChanges();
+    expect(brand.classList.contains('adaptive-logo')).toBe(true);
+    TestBed.inject(PublicContentState).profile.value.set({
+      ...profileFixture,
+      profile_media: { ...card.cover!, url: 'https://example.test/opaque-logo.jpg' },
+    });
+    fixture.detectChanges();
+    expect(brand.classList.contains('adaptive-logo')).toBe(false);
+    expect(brand.classList.contains('white-logo')).toBe(false);
   });
 });

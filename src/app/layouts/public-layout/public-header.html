@@ -3,6 +3,7 @@
     #brand
     routerLink="/"
     class="public-brand"
+    [class.adaptive-logo]="adaptiveLogo()"
     [class.white-logo]="whiteLogo()"
     [attr.aria-label]="content.name() + ' — Inicio'"
   >
@@ -16,6 +17,7 @@
           height="64"
           loading="eager"
           decoding="async"
+          (load)="analyzeLogo()"
           (error)="failedLogo.set(url)"
         />
       } @else {

@@ -45,12 +45,14 @@ a {
 }
 .brand-logo {
   object-fit: contain;
+}
+.adaptive-logo .brand-logo {
   filter: brightness(0);
 }
 .public-brand.white-logo {
   color: #fff;
 }
-.white-logo .brand-logo {
+.adaptive-logo.white-logo .brand-logo {
   filter: brightness(0) invert(1);
 }
 .brand-symbol {

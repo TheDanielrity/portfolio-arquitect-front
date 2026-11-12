@@ -17,7 +17,10 @@ independent. Do not guess that every phone number supports WhatsApp.
 
 ## Visual reference files
 
-The public header logo uses a monochrome treatment. Over a hero, sample the
+Analyze uploaded logos before applying a monochrome treatment. Preserve opaque,
+colored or multitone images, and preserve originals when sampling is unavailable.
+Only neutral, single-tone logos with meaningful transparency may adapt. Before
+analysis completes, show the original image. Initials always adapt. Over a hero, sample the
 displayed cover region behind the logo, including its dark overlay, and choose
 white or black by contrast. Recalculate after image changes and viewport resize.
 Use white when image sampling is unavailable. A solid header or open menu uses
